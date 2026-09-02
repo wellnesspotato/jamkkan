@@ -123,6 +123,12 @@ button {
   margin-top: 32px;
 }
 
+.session-duration-note {
+  margin-top: 14px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
 .secondary-text {
   margin-top: 18px;
   color: var(--text-secondary);

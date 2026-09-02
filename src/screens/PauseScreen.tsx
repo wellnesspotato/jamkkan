@@ -1,16 +1,20 @@
 import { useEffect, useState, type KeyboardEvent } from 'react'
 import Hourglass from '../components/Hourglass'
-import { MINIMUM_DURATION_MS } from '../constants/pause'
+import { formatDurationMinutes } from '../constants/pause'
 
 type PauseScreenProps = {
   startedAt: number | null
   sandColor: string
+  minimumDurationMs: number
+  minimumDurationMinutes: number
   onEnd: () => void
 }
 
 function PauseScreen({
   startedAt,
   sandColor,
+  minimumDurationMs,
+  minimumDurationMinutes,
   onEnd,
 }: PauseScreenProps) {
   const [elapsedMs, setElapsedMs] = useState(() =>
@@ -32,8 +36,8 @@ function PauseScreen({
     return () => window.clearInterval(intervalId)
   }, [startedAt])
 
-  const hasReachedMinimum = elapsedMs >= MINIMUM_DURATION_MS
-  const progress = Math.min(elapsedMs / MINIMUM_DURATION_MS, 1)
+  const hasReachedMinimum = elapsedMs >= minimumDurationMs
+  const progress = Math.min(elapsedMs / minimumDurationMs, 1)
 
   useEffect(() => {
     let wakeLock: WakeLockSentinel | null = null
@@ -128,7 +132,7 @@ function PauseScreen({
         <Hourglass progress={progress} color={sandColor} flipped />
         {hasReachedMinimum ? (
           <p className="pause-open-message">
-            1분이 지났어요.
+            {formatDurationMinutes(minimumDurationMinutes)}이 지났어요.
             <br />
             <br />
             더 머물고 싶다면

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getMinimumDurationMinutes } from './constants/pause'
 import { PAUSE_THEMES } from './constants/themes'
 import LandingScreen from './screens/LandingScreen'
 import PauseScreen from './screens/PauseScreen'
@@ -19,6 +20,10 @@ const initialSession: PauseSession = {
 function App() {
   const [phase, setPhase] = useState<PausePhase>('landing')
   const [session, setSession] = useState<PauseSession>(initialSession)
+  const [minimumDurationMinutes] = useState(() =>
+    getMinimumDurationMinutes(window.location.search),
+  )
+  const minimumDurationMs = minimumDurationMinutes * 60_000
 
   const handleStart = () => {
     const startedAt = Date.now()
@@ -79,6 +84,8 @@ function App() {
       <PauseScreen
         startedAt={session.startedAt}
         sandColor={theme.sand}
+        minimumDurationMs={minimumDurationMs}
+        minimumDurationMinutes={minimumDurationMinutes}
         onEnd={handleSessionEnd}
       />
     )
@@ -108,7 +115,13 @@ function App() {
     )
   }
 
-  return <LandingScreen sandColor={PAUSE_THEMES[0].sand} onStart={handleStart} />
+  return (
+    <LandingScreen
+      sandColor={PAUSE_THEMES[0].sand}
+      minimumDurationMinutes={minimumDurationMinutes}
+      onStart={handleStart}
+    />
+  )
 }
 
 export default App

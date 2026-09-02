@@ -1,11 +1,17 @@
 import Hourglass from '../components/Hourglass'
+import { formatDurationMinutes } from '../constants/pause'
 
 type LandingScreenProps = {
   sandColor: string
+  minimumDurationMinutes: number
   onStart: () => void
 }
 
-function LandingScreen({ sandColor, onStart }: LandingScreenProps) {
+function LandingScreen({
+  sandColor,
+  minimumDurationMinutes,
+  onStart,
+}: LandingScreenProps) {
   return (
     <main className="screen landing-screen">
       <div className="screen-content landing-content">
@@ -23,6 +29,11 @@ function LandingScreen({ sandColor, onStart }: LandingScreenProps) {
           <br />
           모래시계를 뒤집어보세요.
         </p>
+        {minimumDurationMinutes > 1 && (
+          <p className="session-duration-note">
+            {formatDurationMinutes(minimumDurationMinutes)} 동안 머물러요.
+          </p>
+        )}
         <p className="secondary-text">
           휴대폰을 내려놓고
           <br />
