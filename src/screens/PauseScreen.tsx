@@ -1,5 +1,6 @@
 import { useEffect, useState, type KeyboardEvent } from 'react'
 import Hourglass from '../components/Hourglass'
+import PauseLayout from '../components/PauseLayout'
 import { COPY } from '../constants/copy'
 import { formatDurationMinutes } from '../constants/pause'
 
@@ -129,40 +130,35 @@ function PauseScreen({
       role={hasReachedMinimum ? 'button' : undefined}
       tabIndex={hasReachedMinimum ? 0 : undefined}
     >
-      <div className="pause-layout">
-        <div className="hourglass-stage">
-          <div className="hourglass-viewport">
-            <Hourglass progress={progress} color={sandColor} />
-          </div>
-        </div>
-        <div className="message-stage">
-          {hasReachedMinimum ? (
-            <p className="pause-open-message">
-              <span>
-                {COPY.pause.milestoneTitle(
-                  formatDurationMinutes(minimumDurationMinutes),
-                )}
-              </span>
-              <span>
-                {COPY.pause.milestoneBodyLines[0]}
-                <br />
-                {COPY.pause.milestoneBodyLines[1]}
-              </span>
-              <span>
-                {COPY.pause.milestoneActionLines[0]}
-                <br />
-                {COPY.pause.milestoneActionLines[1]}
-              </span>
-            </p>
+      <PauseLayout
+        hourglass={<Hourglass progress={progress} color={sandColor} />}
+        title={
+          hasReachedMinimum
+            ? COPY.openEnded.title(
+                formatDurationMinutes(minimumDurationMinutes),
+              )
+            : COPY.pause.title
+        }
+        description={
+          hasReachedMinimum ? (
+            <div className="pause-layout-description pause-layout-description--open">
+              {COPY.openEnded.descriptionLines.map((lines) => (
+                <p key={lines[0]}>
+                  {lines[0]}
+                  <br />
+                  {lines[1]}
+                </p>
+              ))}
+            </div>
           ) : (
-            <p className="pause-intro">
-              {COPY.pause.initialLines[0]}
+            <p className="pause-layout-description">
+              {COPY.pause.descriptionLines[0]}
               <br />
-              {COPY.pause.initialLines[1]}
+              {COPY.pause.descriptionLines[1]}
             </p>
-          )}
-        </div>
-      </div>
+          )
+        }
+      />
     </main>
   )
 }

@@ -5,7 +5,7 @@ import LandingScreen from './screens/LandingScreen'
 import PauseScreen from './screens/PauseScreen'
 import ReflectionScreen from './screens/ReflectionScreen'
 import ResultScreen from './screens/ResultScreen'
-import type { PausePhase, PauseSession } from './types/pause'
+import type { KeywordFont, PausePhase, PauseSession } from './types/pause'
 
 const initialSession: PauseSession = {
   startedAt: null,
@@ -15,6 +15,7 @@ const initialSession: PauseSession = {
   note: '',
   place: '',
   themeId: '',
+  keywordFont: 'sans',
 }
 
 function getRandomTheme(excludedThemeId?: string) {
@@ -46,6 +47,7 @@ function App() {
       note: '',
       place: '',
       themeId: currentTheme.id,
+      keywordFont: 'sans',
     })
     setPhase('pausing')
   }
@@ -76,12 +78,14 @@ function App() {
     keyword: string,
     note: string,
     place: string,
+    keywordFont: KeywordFont,
   ) => {
     setSession((currentSession) => ({
       ...currentSession,
       keyword,
       note,
       place,
+      keywordFont,
     }))
     setPhase('result')
   }
@@ -110,8 +114,15 @@ function App() {
         keyword={session.keyword}
         note={session.note}
         place={session.place}
+        keywordFont={session.keywordFont}
         postitColor={theme.postit}
         onComplete={handleReflectionComplete}
+        onKeywordFontChange={(keywordFont) => {
+          setSession((currentSession) => ({
+            ...currentSession,
+            keywordFont,
+          }))
+        }}
       />
     )
   }

@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import Hourglass from '../components/Hourglass'
+import PauseLayout from '../components/PauseLayout'
 import { COPY } from '../constants/copy'
 import { formatDurationMinutes } from '../constants/pause'
 
@@ -27,9 +28,9 @@ function LandingScreen({
 
   return (
     <main className="pause-shell landing-screen">
-      <div className="pause-layout">
-        <div className="hourglass-stage">
-          <div className="hourglass-viewport">
+      <PauseLayout
+        hourglass={
+          <>
             <button
               className="hourglass-button"
               type="button"
@@ -38,28 +39,28 @@ function LandingScreen({
             >
               <Hourglass progress={1} color={sandColor} />
             </button>
-          </div>
-        </div>
-        <div className="message-stage landing-message">
-          <p className="landing-instruction">
-            {COPY.landing.instructionLines[0]}
-            <br />
-            {COPY.landing.instructionLines[1]}
-          </p>
-          {minimumDurationMinutes > 1 && (
-            <p className="session-duration-note">
-              {COPY.landing.longSession(
-                formatDurationMinutes(minimumDurationMinutes),
-              )}
+          </>
+        }
+        title={
+          COPY.landing.titleLines[0]
+        }
+        description={
+          <>
+            <p className="pause-layout-description">
+              {COPY.landing.descriptionLines[0]}
+              <br />
+              {COPY.landing.descriptionLines[1]}
             </p>
-          )}
-          <p className="secondary-text">
-            {COPY.landing.supportingLines[0]}
-            <br />
-            {COPY.landing.supportingLines[1]}
-          </p>
-        </div>
-      </div>
+            {minimumDurationMinutes > 1 && (
+              <p className="session-duration-note">
+                {COPY.landing.longSession(
+                  formatDurationMinutes(minimumDurationMinutes),
+                )}
+              </p>
+            )}
+          </>
+        }
+      />
     </main>
   )
 }

@@ -1,6 +1,7 @@
 import { forwardRef } from 'react'
 import BrandLogo from './BrandLogo'
 import { COPY } from '../constants/copy'
+import { KEYWORD_FONT_CLASS } from '../constants/keywordFonts'
 import { PAUSE_THEMES } from '../constants/themes'
 import type { PauseSession } from '../types/pause'
 
@@ -13,8 +14,17 @@ function formatDate(startedAt: number) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
+  const weekdays = [
+    '일요일',
+    '월요일',
+    '화요일',
+    '수요일',
+    '목요일',
+    '금요일',
+    '토요일',
+  ]
 
-  return `${year}.${month}.${day}`
+  return `${year}.${month}.${day} ${weekdays[date.getDay()]}`
 }
 
 function formatTime(timestamp: number) {
@@ -92,7 +102,9 @@ const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
         className="keyword-postit record-keyword-postit"
         style={{ backgroundColor: theme.postit }}
       >
-        <p className="record-keyword">{session.keyword}</p>
+        <p className={`record-keyword ${KEYWORD_FONT_CLASS[session.keywordFont]}`}>
+          {session.keyword}
+        </p>
       </div>
 
       {(session.note !== '' || session.place !== '') && (

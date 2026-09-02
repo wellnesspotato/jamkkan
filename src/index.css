@@ -1,4 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600&display=swap');
+
+@font-face {
+  font-family: "NanumURiDdarSonGeurSsi";
+  src: url("./assets/NanumURiDdarSonGeurSsi.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "NanumSinHonBuBu";
+  src: url("./assets/NanumSinHonBuBu.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
 
 :root {
   --color-background: #f7f5ef;
@@ -32,7 +48,7 @@
   --font-size-body: 16px;
   --font-size-supporting: 14px;
   --font-size-caption: 12px;
-  --font-size-keyword: 28px;
+  --font-size-keyword: 36px;
   --font-size-button: 16px;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -43,7 +59,7 @@
   --line-height-body: 1.6;
   --line-height-supporting: 1.55;
   --line-height-caption: 1.5;
-  --line-height-keyword: 1.35;
+  --line-height-keyword: 1.3;
   --line-height-button: 1.4;
   font-family: "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
@@ -115,8 +131,11 @@ button:focus-visible {
 
 .pause-shell {
   display: flex;
+  align-items: center;
   flex-direction: column;
-  min-height: 100dvh;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100svh;
   padding: max(var(--space-5), env(safe-area-inset-top))
     max(var(--space-5), env(safe-area-inset-right))
     max(var(--space-5), env(safe-area-inset-bottom))
@@ -125,9 +144,11 @@ button:focus-visible {
 
 .pause-layout {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   flex-direction: column;
   min-height: 0;
+  width: 100%;
+  margin-top: -48px;
 }
 
 .hourglass-stage {
@@ -143,6 +164,9 @@ button:focus-visible {
 }
 
 .brand-logo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
   color: var(--color-text-primary);
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-medium);
@@ -156,16 +180,44 @@ button:focus-visible {
 
 .brand-logo__medium {
   font-weight: var(--font-weight-medium);
-  margin-left: 1px;
 }
 
-.message-stage {
-  flex: 1 1 auto;
+.pause-copy-stage {
+  flex: 0 0 auto;
   min-height: 0;
   width: min(100%, 320px);
-  padding-top: var(--space-7);
+  padding-top: var(--space-1);
   margin-inline: auto;
   text-align: center;
+}
+
+.pause-title-stage {
+  min-height: 68px;
+}
+
+.pause-layout-title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-title);
+}
+
+.pause-description-stage {
+  min-height: 44px;
+  margin-top: var(--space-1);
+}
+
+.pause-layout-description {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-supporting);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-supporting);
+}
+
+.pause-layout-description--open p + p {
+  margin-top: var(--space-5);
 }
 
 .hourglass-button {
@@ -214,55 +266,12 @@ button:focus-visible {
   stroke-linejoin: round;
 }
 
-.landing-instruction {
-  margin: 0;
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-body);
-}
-
 .session-duration-note {
   margin-top: var(--space-3);
   color: var(--color-text-secondary);
   font-size: var(--font-size-supporting);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-supporting);
-}
-
-.secondary-text {
-  margin-top: var(--space-5);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-supporting);
-  font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-supporting);
-}
-
-.pause-intro,
-.pause-open-message {
-  margin: 0;
-  font-size: var(--font-size-supporting);
-  font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-supporting);
-}
-
-.pause-intro {
-  color: var(--color-text-secondary);
-}
-
-.pause-open-message span {
-  display: block;
-}
-
-.pause-open-message span + span {
-  margin-top: var(--space-5);
-  color: var(--color-text-secondary);
-}
-
-.pause-open-message span:first-child {
-  color: var(--color-text-primary);
-  font-size: var(--font-size-title);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-title);
 }
 
 .pause-screen--open {
@@ -344,16 +353,63 @@ textarea {
 }
 
 .reflection-keyword-input {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  min-height: 0;
   padding: 0;
   border: 0;
-  font-size: var(--font-size-keyword);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-keyword);
   text-align: center;
+  color: var(--color-text-primary);
   background: transparent;
   box-shadow: none;
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+  field-sizing: content;
+  white-space: pre-wrap;
+  resize: none;
   -webkit-appearance: none;
   appearance: none;
+}
+
+.keyword-font--sans {
+  font-family: "Noto Sans KR", sans-serif;
+  font-size: 28px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.35;
+  letter-spacing: 0.015em;
+}
+
+.keyword-font--serif {
+  font-family: "Noto Serif KR", serif;
+  font-size: 29px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.32;
+  letter-spacing: 0.01em;
+}
+
+.keyword-font--daughter {
+  font-family: "NanumURiDdarSonGeurSsi", "Noto Sans KR", sans-serif;
+  font-size: 36px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+}
+
+.keyword-font--newlywed {
+  font-family: "NanumSinHonBuBu", "Noto Sans KR", sans-serif;
+  font-size: 35px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.3;
+  letter-spacing: 0.03em;
+}
+
+.keyword-input-zone {
+  display: flex;
+  width: 100%;
+  height: 120px;
+  min-width: 0;
+  align-items: center;
 }
 
 .reflection-details {
@@ -367,8 +423,10 @@ textarea {
 }
 
 .reflection-note-input {
+  height: 120px;
   min-height: 120px;
-  padding: var(--space-4);
+  box-sizing: border-box;
+  padding: 12px var(--space-4);
   border: 1px solid var(--color-divider);
   border-radius: var(--radius-12);
   font-size: var(--font-size-body);
@@ -376,6 +434,8 @@ textarea {
   line-height: var(--line-height-body);
   background: var(--color-surface);
   box-shadow: none;
+  overflow-y: auto;
+  resize: none;
   -webkit-appearance: none;
   appearance: none;
 }
@@ -401,11 +461,51 @@ textarea {
   opacity: 0.92;
 }
 
+.reflection-keyword-input:focus::placeholder,
+.reflection-note-input:focus::placeholder,
+.reflection-place-input:focus::placeholder {
+  color: transparent;
+}
+
 .reflection-note-input:focus,
 .reflection-place-input:focus {
   border-color: var(--color-divider);
   outline: none;
   box-shadow: none;
+}
+
+.keyword-font-cycle-button {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 3px 4px;
+  border: 0;
+  color: var(--color-text-secondary);
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  font-size: var(--font-size-supporting);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-supporting);
+  touch-action: manipulation;
+}
+
+.keyword-font-cycle-button::before {
+  position: absolute;
+  content: '';
+  inset: -10px;
+}
+
+.keyword-font-cycle-button:active {
+  opacity: 0.72;
+}
+
+.keyword-font-cycle-button:focus-visible {
+  outline: 1px solid var(--color-text-secondary);
+  outline-offset: 1px;
 }
 
 .place-field .field-label {
@@ -421,7 +521,7 @@ textarea::placeholder {
 .place-action {
   min-width: 0;
   min-height: 40px;
-  margin: var(--space-5) 0 0;
+  margin: var(--space-2) 0 0;
   padding: var(--space-2) 0;
   border: 0;
   color: var(--color-text-secondary);
@@ -433,14 +533,9 @@ textarea::placeholder {
   text-underline-offset: 3px;
 }
 
-.reflection-keyword-input::placeholder,
 .reflection-note-input::placeholder,
 .reflection-place-input::placeholder {
   color: var(--color-text-tertiary);
-}
-
-.reflection-keyword-input::placeholder {
-  color: color-mix(in srgb, var(--color-text-tertiary) 78%, transparent);
 }
 
 .validation-message {
@@ -523,11 +618,10 @@ textarea::placeholder {
 }
 
 .record-keyword {
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
   overflow-wrap: anywhere;
-  font-size: var(--font-size-keyword);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-keyword);
   text-align: center;
 }
 
@@ -537,10 +631,13 @@ textarea::placeholder {
 }
 
 .record-note {
-  font-size: var(--font-size-body);
+  min-width: 0;
+  max-width: 100%;
+  font-size: 15px;
   font-weight: var(--font-weight-regular);
+  overflow-wrap: anywhere;
   white-space: pre-wrap;
-  line-height: var(--line-height-body);
+  line-height: 1.7;
 }
 
 .record-place {

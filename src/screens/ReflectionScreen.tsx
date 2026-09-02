@@ -1,20 +1,36 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { COPY } from '../constants/copy'
+import {
+  getNextKeywordFont,
+  KEYWORD_FONT_CLASS,
+  preloadKeywordFont,
+  preloadKeywordFonts,
+} from '../constants/keywordFonts'
+import type { KeywordFont } from '../types/pause'
 
 type ReflectionScreenProps = {
   keyword: string
   note: string
   place: string
+  keywordFont: KeywordFont
   postitColor: string
-  onComplete: (keyword: string, note: string, place: string) => void
+  onComplete: (
+    keyword: string,
+    note: string,
+    place: string,
+    keywordFont: KeywordFont,
+  ) => void
+  onKeywordFontChange: (keywordFont: KeywordFont) => void
 }
 
 function ReflectionScreen({
   keyword: initialKeyword,
   note: initialNote,
   place: initialPlace,
+  keywordFont,
   postitColor,
   onComplete,
+  onKeywordFontChange,
 }: ReflectionScreenProps) {
   const [keyword, setKeyword] = useState(initialKeyword)
   const [note, setNote] = useState(initialNote)
@@ -22,8 +38,16 @@ function ReflectionScreen({
   const [isPlaceVisible, setIsPlaceVisible] = useState(initialPlace !== '')
   const [validationMessage, setValidationMessage] = useState('')
 
+  useEffect(() => {
+    preloadKeywordFonts()
+  }, [])
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
+    if ((event.nativeEvent as SubmitEvent).submitter === null) {
+      return
+    }
 
     const trimmedKeyword = keyword.trim()
 
@@ -32,7 +56,22 @@ function ReflectionScreen({
       return
     }
 
-    onComplete(trimmedKeyword, note.trim(), place.trim())
+    onComplete(trimmedKeyword, note.trim(), place.trim(), keywordFont)
+  }
+
+  const handleKeywordKeyDown = (
+    event: KeyboardEvent<HTMLTextAreaElement>,
+  ) => {
+    if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+      event.preventDefault()
+    }
+  }
+
+  const handleKeywordFontCycle = () => {
+    const nextFont = getNextKeywordFont(keywordFont)
+
+    onKeywordFontChange(nextFont)
+    void preloadKeywordFont(nextFont)
   }
 
   return (
@@ -49,18 +88,28 @@ function ReflectionScreen({
           className="keyword-postit reflection-keyword-postit"
           style={{ backgroundColor: postitColor }}
         >
-          <input
-            className="reflection-keyword-input"
-            id="keyword"
-            type="text"
-            value={keyword}
-            maxLength={30}
-            placeholder={COPY.reflection.keywordPlaceholder}
-            onChange={(event) => {
-              setKeyword(event.target.value)
-              setValidationMessage('')
-            }}
-          />
+          <div className="keyword-input-zone">
+            <textarea
+              className={`reflection-keyword-input ${KEYWORD_FONT_CLASS[keywordFont]}`}
+              id="keyword"
+              value={keyword}
+              maxLength={30}
+              placeholder={COPY.reflection.keywordPlaceholder}
+              onKeyDown={handleKeywordKeyDown}
+              onChange={(event) => {
+                setKeyword(event.target.value)
+                setValidationMessage('')
+              }}
+              />
+          </div>
+          <button
+            className="keyword-font-cycle-button"
+            type="button"
+            aria-label={COPY.reflection.fontCycleAria}
+            onClick={handleKeywordFontCycle}
+          >
+            Aa
+          </button>
         </div>
 
         <div className="reflection-details">
@@ -71,7 +120,6 @@ function ReflectionScreen({
             className="reflection-note-input"
             id="note"
             value={note}
-            maxLength={100}
             placeholder={COPY.reflection.notePlaceholder}
             onChange={(event) => setNote(event.target.value)}
           />
