@@ -618,6 +618,10 @@ textarea::placeholder {
   background: var(--color-background);
 }
 
+.share-capture-wrapper .record-card {
+  box-shadow: none;
+}
+
 .record-card .brand-logo {
   width: var(--record-content-width);
   font-size: var(--font-size-supporting);

@@ -3,12 +3,12 @@ export const COPY = {
     title: '잠깐명상',
     startAriaLabel: '잠깐명상 시작하기',
     titleLines: ['모래시계를 눌러 시작해요'],
-    descriptionLines: ['휴대폰을 내려놓고', '잠깐 주변을 바라봐요'],
+    descriptionLines: ['휴대폰을 내려놓고', '잠깐 멈춰볼까요?'],
     longSession: (duration: string) => `${duration} 동안 머물러요`,
   },
   pause: {
-    title: '지금, 잠깐',
-    descriptionLines: ['주변에 무엇이 보이나요?', '느껴보세요'],
+    title: '지금, 여기',
+    descriptionLines: ['주변을 바라봐도 좋고', '눈을 감아도 좋아요'],
   },
   openEnded: {
     title: (duration: string) =>
