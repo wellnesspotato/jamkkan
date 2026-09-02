@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import RecordCard from '../components/RecordCard'
 import { COPY } from '../constants/copy'
 import type { PauseSession } from '../types/pause'
@@ -37,6 +37,17 @@ function ResultScreen({
   preparedShareFile,
   onRestart,
 }: ResultScreenProps) {
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+
+    const scrollingElement = document.scrollingElement
+
+    if (scrollingElement !== null) {
+      scrollingElement.scrollTop = 0
+      scrollingElement.scrollLeft = 0
+    }
+  }, [])
+
   const hasLoggedResultPhaseRef = useRef(false)
   const [isSharing, setIsSharing] = useState(false)
   const [actionError, setActionError] = useState('')
