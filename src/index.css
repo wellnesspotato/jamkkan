@@ -1,0 +1,371 @@
+:root {
+  --background: #f7f6f2;
+  --text-primary: #252422;
+  --text-secondary: #77746d;
+  --line: #dedcd5;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text-primary);
+  background: var(--background);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100dvh;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+}
+
+main {
+  min-height: 100dvh;
+}
+
+.screen {
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-top))
+    max(24px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom))
+    max(24px, env(safe-area-inset-left));
+}
+
+.screen-content {
+  width: min(100%, 360px);
+  text-align: center;
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+p {
+  line-height: 1.6;
+}
+
+button {
+  min-width: 96px;
+  min-height: 48px;
+  margin-top: 32px;
+  padding: 12px 20px;
+  font: inherit;
+  color: inherit;
+}
+
+.landing-content,
+.pause-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.landing-title {
+  margin-bottom: 40px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.hourglass-button {
+  display: grid;
+  min-width: 48px;
+  min-height: 48px;
+  margin: 0;
+  padding: 8px;
+  border: 0;
+  border-radius: 16px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hourglass-button:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 6px;
+}
+
+.hourglass {
+  display: block;
+  width: 124px;
+  height: auto;
+  transform-origin: center;
+}
+
+.hourglass--flipped {
+  animation: hourglass-flip 500ms ease-in-out;
+}
+
+.hourglass-glass {
+  fill: rgba(255, 255, 255, 0.28);
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.hourglass-sand {
+  transition: y 250ms linear, height 250ms linear;
+}
+
+.hourglass-frame {
+  fill: var(--text-primary);
+  stroke: var(--text-primary);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.landing-instruction {
+  margin-top: 32px;
+}
+
+.secondary-text {
+  margin-top: 18px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.pause-intro,
+.pause-open-message {
+  margin-top: 36px;
+}
+
+.pause-intro {
+  animation: pause-intro-fade 1s ease 3.5s forwards;
+}
+
+.pause-screen--open {
+  cursor: pointer;
+}
+
+.pause-screen--open:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: -8px;
+}
+
+.reflection-form {
+  text-align: left;
+}
+
+.postit {
+  width: 100%;
+  padding: 28px 24px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  border-radius: 4px;
+}
+
+.reflection-question,
+.field-label {
+  display: block;
+  line-height: 1.6;
+}
+
+.reflection-question {
+  margin-bottom: 20px;
+}
+
+.field-label {
+  margin-top: 28px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 35%, transparent);
+  border-radius: 0;
+  padding: 10px 0;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.6;
+  color: inherit;
+  background: transparent;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid color-mix(in srgb, var(--text-primary) 55%, transparent);
+  outline-offset: 3px;
+}
+
+textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, var(--text-primary) 45%, transparent);
+}
+
+.place-action {
+  min-width: 0;
+  min-height: 40px;
+  margin: 24px 0 0;
+  padding: 8px 0;
+  border: 0;
+  color: var(--text-secondary);
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.validation-message {
+  margin-top: 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+}
+
+.reflection-submit {
+  display: block;
+  width: 100%;
+  margin-top: 24px;
+  border: 1px solid var(--text-primary);
+  border-radius: 4px;
+  background: transparent;
+}
+
+.result-content {
+  width: min(100%, 420px);
+}
+
+.record-card {
+  width: 100%;
+  padding: 28px 24px 32px;
+  border: 1px solid var(--line);
+  border-top-width: 6px;
+  border-radius: 6px;
+  background: #fffdf8;
+  text-align: left;
+}
+
+.record-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.record-brand {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.record-date-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.record-duration {
+  margin-top: 44px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.record-keyword {
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 18px;
+  padding: 8px 12px;
+  overflow-wrap: anywhere;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.record-note {
+  margin-top: 32px;
+  white-space: pre-wrap;
+  line-height: 1.8;
+}
+
+.record-place {
+  margin-top: 24px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.result-controls {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.save-image-button,
+.share-button {
+  width: 100%;
+  border: 1px solid var(--text-primary);
+  border-radius: 4px;
+  color: var(--background);
+  background: var(--text-primary);
+}
+
+.save-image-button {
+  margin-top: 0;
+}
+
+.share-button {
+  margin-top: 12px;
+}
+
+.save-image-button:disabled,
+.share-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.image-error {
+  margin-top: 14px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.result-guidance {
+  margin-top: 18px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.restart-button {
+  border: 0;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@keyframes hourglass-flip {
+  from {
+    transform: rotate(180deg);
+  }
+
+  to {
+    transform: rotate(0);
+  }
+}
+
+@keyframes pause-intro-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hourglass--flipped,
+  .pause-intro {
+    animation: none;
+  }
+
+  .hourglass-sand {
+    transition: none;
+  }
+}

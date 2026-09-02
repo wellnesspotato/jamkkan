@@ -1,0 +1,1 @@
+export const MINIMUM_DURATION_MS = 60_000
