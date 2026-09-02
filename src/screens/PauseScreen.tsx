@@ -131,7 +131,9 @@ function PauseScreen({
     >
       <div className="pause-layout">
         <div className="hourglass-stage">
-          <Hourglass progress={progress} color={sandColor} />
+          <div className="hourglass-viewport">
+            <Hourglass progress={progress} color={sandColor} />
+          </div>
         </div>
         <div className="message-stage">
           {hasReachedMinimum ? (

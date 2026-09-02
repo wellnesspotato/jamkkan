@@ -29,14 +29,16 @@ function LandingScreen({
     <main className="pause-shell landing-screen">
       <div className="pause-layout">
         <div className="hourglass-stage">
-          <button
-            className="hourglass-button"
-            type="button"
-            aria-label={COPY.landing.startAriaLabel}
-            onClick={handleStart}
-          >
-            <Hourglass progress={1} color={sandColor} />
-          </button>
+          <div className="hourglass-viewport">
+            <button
+              className="hourglass-button"
+              type="button"
+              aria-label={COPY.landing.startAriaLabel}
+              onClick={handleStart}
+            >
+              <Hourglass progress={1} color={sandColor} />
+            </button>
+          </div>
         </div>
         <div className="message-stage landing-message">
           <p className="landing-instruction">
