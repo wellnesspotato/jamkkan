@@ -2,9 +2,10 @@ import { toBlob } from 'html-to-image'
 
 export async function createRecordImage(element: HTMLElement): Promise<Blob> {
   await document.fonts.ready
+  const backgroundColor = window.getComputedStyle(element).backgroundColor
 
   const blob = await toBlob(element, {
-    backgroundColor: '#fffdf8',
+    backgroundColor,
     pixelRatio: 2,
   })
 

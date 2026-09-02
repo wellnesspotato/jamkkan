@@ -45,6 +45,7 @@ function ReflectionScreen({
             방금 가장 눈에 들어온 것은 무엇이었나요?
           </label>
           <input
+            className="reflection-keyword-input"
             id="keyword"
             type="text"
             value={keyword}
@@ -60,6 +61,7 @@ function ReflectionScreen({
             조금 더 남기고 싶다면
           </label>
           <textarea
+            className="reflection-note-input"
             id="note"
             value={note}
             maxLength={100}
@@ -73,6 +75,7 @@ function ReflectionScreen({
                 장소
               </label>
               <input
+                className="reflection-place-input"
                 id="place"
                 type="text"
                 value={place}

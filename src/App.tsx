@@ -38,6 +38,9 @@ function App() {
       place: '',
       themeId: theme.id,
     })
+  }
+
+  const handleFlipComplete = () => {
     setPhase('pausing')
   }
 
@@ -120,6 +123,7 @@ function App() {
       sandColor={PAUSE_THEMES[0].sand}
       minimumDurationMinutes={minimumDurationMinutes}
       onStart={handleStart}
+      onFlipComplete={handleFlipComplete}
     />
   )
 }

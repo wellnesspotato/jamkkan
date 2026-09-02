@@ -3,59 +3,68 @@ import { useId } from 'react'
 type HourglassProps = {
   progress: number
   color: string
-  flipped?: boolean
 }
 
-function Hourglass({ progress, color, flipped = false }: HourglassProps) {
+function Hourglass({ progress, color }: HourglassProps) {
   const clipPathId = useId().replaceAll(':', '')
   const normalizedProgress = Math.min(Math.max(progress, 0), 1)
-  const sandHeight = 48
+  const sandHeight = 52
+  const upperSandBottomY = 80
+  const lowerSandBottomY = 136
   const upperSandHeight = sandHeight * (1 - normalizedProgress)
-  const upperSandY = 76 - upperSandHeight
+  const upperSandY = upperSandBottomY - upperSandHeight
   const lowerSandHeight = sandHeight * normalizedProgress
-  const lowerSandY = 132 - lowerSandHeight
+  const lowerSandY = lowerSandBottomY - lowerSandHeight
+  const lowerMoundHeight = Math.min(3, lowerSandHeight / 2)
+  const lowerSandSurfaceY = lowerSandY - lowerMoundHeight
   const isFlowing = normalizedProgress > 0 && normalizedProgress < 1
+  const glassPath =
+    'M27 24h66c-1 24-11 39-27 52-4 3-4 5 0 8 16 13 26 28 27 52H27c1-24 11-39 27-52 4-3 4-5 0-8-16-13-26-28-27-52Z'
 
   return (
     <svg
-      className={`hourglass${flipped ? ' hourglass--flipped' : ''}`}
+      className="hourglass"
       viewBox="0 0 120 160"
       aria-hidden="true"
       focusable="false"
     >
       <defs>
         <clipPath id={clipPathId}>
-          <path d="M25 22h70c0 30-13 43-29 56-2 2-2 3 0 5 16 13 29 26 29 55H25c0-29 13-42 29-55 2-2 2-3 0-5-16-13-29-26-29-56Z" />
+          <path d={glassPath} />
         </clipPath>
       </defs>
 
-      <path
-        className="hourglass-glass"
-        d="M25 22h70c0 30-13 43-29 56-2 2-2 3 0 5 16 13 29 26 29 55H25c0-29 13-42 29-55 2-2 2-3 0-5-16-13-29-26-29-56Z"
-      />
+      <path className="hourglass-glass" d={glassPath} />
 
       <g clipPath={`url(#${clipPathId})`} fill={color}>
-        <rect
-          className="hourglass-sand"
-          x="25"
-          y={upperSandY}
-          width="70"
-          height={upperSandHeight}
-        />
-        {isFlowing && <rect x="58.5" y="73" width="3" height="30" rx="1.5" />}
-        <rect
-          className="hourglass-sand"
-          x="25"
-          y={lowerSandY}
-          width="70"
-          height={lowerSandHeight}
-        />
+        {upperSandHeight > 0 && (
+          <path
+            className="hourglass-sand"
+            d={`M24 ${upperSandY} Q60 ${upperSandY + 2} 96 ${upperSandY} V82 H24 Z`}
+          />
+        )}
+        {lowerSandHeight > 0 && (
+          <path
+            className="hourglass-sand"
+            d={`M24 138 H96 V${lowerSandY + lowerMoundHeight} Q60 ${lowerSandSurfaceY} 24 ${lowerSandY + lowerMoundHeight} Z`}
+          />
+        )}
       </g>
 
+      {isFlowing && (
+        <line
+          className="hourglass-stream"
+          x1="60"
+          y1="79"
+          x2="60"
+          y2={lowerSandSurfaceY + 1}
+          stroke={color}
+        />
+      )}
+
       <g className="hourglass-frame">
-        <rect x="16" y="14" width="88" height="10" rx="5" />
-        <rect x="16" y="136" width="88" height="10" rx="5" />
-        <path d="M23 24v112M97 24v112" />
+        <path d="M18 20h84M18 140h84" />
+        <path d="M24 24v112M96 24v112" />
       </g>
     </svg>
   )

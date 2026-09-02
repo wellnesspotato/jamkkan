@@ -129,20 +129,20 @@ function PauseScreen({
       tabIndex={hasReachedMinimum ? 0 : undefined}
     >
       <div className="screen-content pause-content">
-        <Hourglass progress={progress} color={sandColor} flipped />
+        <Hourglass progress={progress} color={sandColor} />
         {hasReachedMinimum ? (
           <p className="pause-open-message">
-            {formatDurationMinutes(minimumDurationMinutes)}이 지났어요.
-            <br />
-            <br />
-            더 머물고 싶다면
-            <br />
-            그대로 있어도 괜찮아요.
-            <br />
-            <br />
-            돌아오고 싶을 때
-            <br />
-            화면을 눌러주세요.
+            <span>{formatDurationMinutes(minimumDurationMinutes)}이 지났어요.</span>
+            <span>
+              더 머물고 싶다면
+              <br />
+              그대로 있어도 괜찮아요.
+            </span>
+            <span>
+              돌아오고 싶을 때
+              <br />
+              화면을 눌러주세요.
+            </span>
           </p>
         ) : (
           <p className="pause-intro">

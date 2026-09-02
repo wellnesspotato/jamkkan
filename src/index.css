@@ -66,10 +66,20 @@ button {
   align-items: center;
 }
 
+.landing-content {
+  width: min(100%, 320px);
+}
+
+.pause-content {
+  min-height: 340px;
+  justify-content: flex-start;
+}
+
 .landing-title {
-  margin-bottom: 40px;
-  font-size: 24px;
-  font-weight: 600;
+  margin-bottom: 44px;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
 .hourglass-button {
@@ -93,34 +103,42 @@ button {
 
 .hourglass {
   display: block;
-  width: 124px;
+  width: 132px;
   height: auto;
-  transform-origin: center;
 }
 
-.hourglass--flipped {
-  animation: hourglass-flip 500ms ease-in-out;
+.hourglass-flip-layer {
+  display: block;
+  transform: rotate(0deg);
+  transform-origin: center center;
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .hourglass-glass {
-  fill: rgba(255, 255, 255, 0.28);
+  fill: rgba(255, 255, 255, 0.22);
   stroke: var(--line);
-  stroke-width: 2;
+  stroke-width: 1.5;
 }
 
-.hourglass-sand {
-  transition: y 250ms linear, height 250ms linear;
-}
-
-.hourglass-frame {
-  fill: var(--text-primary);
-  stroke: var(--text-primary);
-  stroke-width: 4;
+.hourglass-stream {
+  stroke-width: 1.5;
   stroke-linecap: round;
 }
 
+.hourglass-frame {
+  fill: none;
+  stroke: var(--text-primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .landing-instruction {
-  margin-top: 32px;
+  margin-top: 28px;
+  font-size: 15px;
+  line-height: 1.75;
 }
 
 .session-duration-note {
@@ -130,18 +148,31 @@ button {
 }
 
 .secondary-text {
-  margin-top: 18px;
+  margin-top: 24px;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 .pause-intro,
 .pause-open-message {
-  margin-top: 36px;
+  margin-top: 40px;
+  font-size: 15px;
+  line-height: 1.75;
 }
 
 .pause-intro {
+  color: var(--text-secondary);
   animation: pause-intro-fade 1s ease 3.5s forwards;
+}
+
+.pause-open-message span {
+  display: block;
+}
+
+.pause-open-message span + span {
+  margin-top: 24px;
+  color: var(--text-secondary);
 }
 
 .pause-screen--open {
@@ -154,14 +185,20 @@ button {
 }
 
 .reflection-form {
+  width: min(100%, 348px);
   text-align: left;
 }
 
 .postit {
+  position: relative;
+  isolation: isolate;
   width: 100%;
-  padding: 28px 24px;
-  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
-  border-radius: 4px;
+  padding: 32px 26px 30px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  border-radius: 2px 3px 2px 2px;
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--text-primary) 6%, transparent),
+    0 8px 22px -20px color-mix(in srgb, var(--text-primary) 35%, transparent);
 }
 
 .reflection-question,
@@ -171,13 +208,16 @@ button {
 }
 
 .reflection-question {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
 }
 
 .field-label {
-  margin-top: 28px;
+  margin-top: 30px;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 input,
@@ -205,6 +245,29 @@ textarea {
   resize: vertical;
 }
 
+.reflection-keyword-input {
+  padding: 8px 0 18px;
+  border-bottom-color: color-mix(in srgb, var(--text-primary) 16%, transparent);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.reflection-note-input {
+  min-height: 112px;
+  padding: 12px 0 4px;
+  border: 0;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.reflection-place-input {
+  padding-top: 8px;
+  border-bottom-color: color-mix(in srgb, var(--text-primary) 16%, transparent);
+  font-size: 14px;
+}
+
 input::placeholder,
 textarea::placeholder {
   color: color-mix(in srgb, var(--text-primary) 45%, transparent);
@@ -220,6 +283,12 @@ textarea::placeholder {
   background: transparent;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.reflection-keyword-input::placeholder,
+.reflection-note-input::placeholder,
+.reflection-place-input::placeholder {
+  color: color-mix(in srgb, var(--text-primary) 36%, transparent);
 }
 
 .validation-message {
@@ -243,63 +312,69 @@ textarea::placeholder {
 }
 
 .record-card {
+  position: relative;
+  isolation: isolate;
   width: 100%;
-  padding: 28px 24px 32px;
-  border: 1px solid var(--line);
-  border-top-width: 6px;
-  border-radius: 6px;
-  background: #fffdf8;
+  padding: 32px 28px 30px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  border-radius: 2px 3px 2px 2px;
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--text-primary) 6%, transparent),
+    0 9px 24px -21px color-mix(in srgb, var(--text-primary) 35%, transparent);
   text-align: left;
 }
 
-.record-card-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: flex-start;
-}
-
-.record-brand {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.record-date-time {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+.record-title {
+  margin: 0;
   color: var(--text-secondary);
   font-size: 13px;
-  line-height: 1.5;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.record-time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 26px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.record-date {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.record-time-range {
+  white-space: nowrap;
 }
 
 .record-duration {
-  margin-top: 44px;
-  color: var(--text-secondary);
-  font-size: 14px;
+  margin-top: 1px;
 }
 
 .record-keyword {
-  display: inline-block;
   max-width: 100%;
-  margin-top: 18px;
-  padding: 8px 12px;
+  margin-top: 48px;
   overflow-wrap: anywhere;
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 600;
   line-height: 1.35;
 }
 
 .record-note {
-  margin-top: 32px;
+  margin-top: 20px;
+  font-size: 15px;
   white-space: pre-wrap;
   line-height: 1.8;
 }
 
 .record-place {
-  margin-top: 24px;
+  margin-top: 42px;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .result-controls {
@@ -346,16 +421,6 @@ textarea::placeholder {
   text-underline-offset: 3px;
 }
 
-@keyframes hourglass-flip {
-  from {
-    transform: rotate(180deg);
-  }
-
-  to {
-    transform: rotate(0);
-  }
-}
-
 @keyframes pause-intro-fade {
   to {
     opacity: 0;
@@ -363,12 +428,8 @@ textarea::placeholder {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hourglass--flipped,
   .pause-intro {
     animation: none;
   }
 
-  .hourglass-sand {
-    transition: none;
-  }
 }

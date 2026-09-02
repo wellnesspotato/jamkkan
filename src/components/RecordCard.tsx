@@ -15,20 +15,34 @@ function formatDate(startedAt: number) {
   return `${year}.${month}.${day}`
 }
 
-function formatStartTime(startedAt: number) {
+function formatTime(timestamp: number) {
   return new Intl.DateTimeFormat('ko-KR', {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-  }).format(new Date(startedAt))
+  }).format(new Date(timestamp))
 }
 
 function formatDuration(durationMs: number) {
   const totalSeconds = Math.floor(durationMs / 1_000)
-  const minutes = Math.floor(totalSeconds / 60)
+  const hours = Math.floor(totalSeconds / 3_600)
+  const minutes = Math.floor((totalSeconds % 3_600) / 60)
   const seconds = totalSeconds % 60
+  const parts: string[] = []
 
-  return seconds === 0 ? `${minutes}분` : `${minutes}분 ${seconds}초`
+  if (hours > 0) {
+    parts.push(`${hours}시간`)
+  }
+
+  if (minutes > 0) {
+    parts.push(`${minutes}분`)
+  }
+
+  if (seconds > 0 || parts.length === 0) {
+    parts.push(`${seconds}초`)
+  }
+
+  return parts.join(' ')
 }
 
 const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
@@ -39,35 +53,48 @@ const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
     PAUSE_THEMES.find(({ id }) => id === session.themeId) ?? PAUSE_THEMES[0]
   const startedAtDateTime =
     session.startedAt === null ? undefined : new Date(session.startedAt).toISOString()
+  const endedAtDateTime =
+    session.endedAt === null ? undefined : new Date(session.endedAt).toISOString()
 
   return (
     <article
       ref={ref}
       className="record-card"
-      style={{ borderTopColor: theme.sand }}
+      style={{ backgroundColor: theme.postit }}
     >
       <header className="record-card-header">
-        <h1 className="record-brand">잠깐명상</h1>
+        <h1 className="record-title">잠깐, 멈춘 기록</h1>
         {session.startedAt !== null && (
-          <div className="record-date-time">
-            <time dateTime={startedAtDateTime}>{formatDate(session.startedAt)}</time>
-            <time dateTime={startedAtDateTime}>{formatStartTime(session.startedAt)}</time>
+          <div className="record-time-block">
+            <time className="record-date" dateTime={startedAtDateTime}>
+              {formatDate(session.startedAt)}
+            </time>
+            {session.endedAt !== null && (
+              <p className="record-time-range">
+                <time dateTime={startedAtDateTime}>
+                  {formatTime(session.startedAt)}
+                </time>
+                <span aria-hidden="true"> - </span>
+                <time dateTime={endedAtDateTime}>
+                  {formatTime(session.endedAt)}
+                </time>
+              </p>
+            )}
+            {session.durationMs !== null && (
+              <p className="record-duration">
+                {formatDuration(session.durationMs)} 머물렀어요.
+              </p>
+            )}
           </div>
         )}
       </header>
 
-      {session.durationMs !== null && (
-        <p className="record-duration">
-          {formatDuration(session.durationMs)} 머물렀어요.
-        </p>
-      )}
-
-      <p className="record-keyword" style={{ backgroundColor: theme.postit }}>
-        {session.keyword}
-      </p>
+      <p className="record-keyword">{session.keyword}</p>
 
       {session.note !== '' && <p className="record-note">{session.note}</p>}
-      {session.place !== '' && <p className="record-place">{session.place}</p>}
+      {session.place !== '' && (
+        <p className="record-place">{session.place}에서</p>
+      )}
     </article>
   )
 })
