@@ -4,9 +4,6 @@ import Hourglass from '../components/Hourglass'
 import { COPY } from '../constants/copy'
 import { formatDurationMinutes } from '../constants/pause'
 
-const INTRO_VISIBLE_MS = 3_500
-const INTRO_FADE_DURATION_MS = 500
-
 type PauseScreenProps = {
   startedAt: number | null
   sandColor: string
@@ -25,22 +22,6 @@ function PauseScreen({
   const [elapsedMs, setElapsedMs] = useState(() =>
     startedAt === null ? 0 : Date.now() - startedAt,
   )
-  const [isIntroFading, setIsIntroFading] = useState(false)
-  const [isIntroMounted, setIsIntroMounted] = useState(true)
-
-  useEffect(() => {
-    const fadeTimeoutId = window.setTimeout(() => {
-      setIsIntroFading(true)
-    }, INTRO_VISIBLE_MS)
-    const hideTimeoutId = window.setTimeout(() => {
-      setIsIntroMounted(false)
-    }, INTRO_VISIBLE_MS + INTRO_FADE_DURATION_MS)
-
-    return () => {
-      window.clearTimeout(fadeTimeoutId)
-      window.clearTimeout(hideTimeoutId)
-    }
-  }, [])
 
   useEffect(() => {
     if (startedAt === null) {
@@ -175,15 +156,13 @@ function PauseScreen({
                 {COPY.pause.milestoneActionLines[1]}
               </span>
             </p>
-          ) : isIntroMounted ? (
-            <p
-              className={`pause-intro${isIntroFading ? ' pause-intro--fading' : ''}`}
-            >
+          ) : (
+            <p className="pause-intro">
               {COPY.pause.initialLines[0]}
               <br />
               {COPY.pause.initialLines[1]}
             </p>
-          ) : null}
+          )}
         </div>
       </div>
     </main>

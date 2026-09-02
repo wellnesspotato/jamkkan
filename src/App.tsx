@@ -17,17 +17,26 @@ const initialSession: PauseSession = {
   themeId: '',
 }
 
+function getRandomTheme(excludedThemeId?: string) {
+  const themes =
+    excludedThemeId === undefined
+      ? PAUSE_THEMES
+      : PAUSE_THEMES.filter(({ id }) => id !== excludedThemeId)
+
+  return themes[Math.floor(Math.random() * themes.length)]
+}
+
 function App() {
   const [phase, setPhase] = useState<PausePhase>('landing')
   const [session, setSession] = useState<PauseSession>(initialSession)
+  const [currentTheme, setCurrentTheme] = useState(() => getRandomTheme())
   const [minimumDurationMinutes] = useState(() =>
     getMinimumDurationMinutes(window.location.search),
   )
-  const minimumDurationMs = minimumDurationMinutes * 60_000
+  const minimumDurationMs = Math.round(minimumDurationMinutes * 60_000)
 
   const handleStart = () => {
     const startedAt = Date.now()
-    const theme = PAUSE_THEMES[Math.floor(Math.random() * PAUSE_THEMES.length)]
 
     setSession({
       startedAt,
@@ -36,11 +45,8 @@ function App() {
       keyword: '',
       note: '',
       place: '',
-      themeId: theme.id,
+      themeId: currentTheme.id,
     })
-  }
-
-  const handleFlipComplete = () => {
     setPhase('pausing')
   }
 
@@ -62,6 +68,7 @@ function App() {
 
   const handleRestart = () => {
     setSession(initialSession)
+    setCurrentTheme((theme) => getRandomTheme(theme.id))
     setPhase('landing')
   }
 
@@ -120,10 +127,9 @@ function App() {
 
   return (
     <LandingScreen
-      sandColor={PAUSE_THEMES[0].sand}
+      sandColor={currentTheme.sand}
       minimumDurationMinutes={minimumDurationMinutes}
       onStart={handleStart}
-      onFlipComplete={handleFlipComplete}
     />
   )
 }

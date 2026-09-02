@@ -8,7 +8,8 @@ export const COPY = {
   },
   pause: {
     initialLines: ['휴대폰을 내려놓고', '잠깐 주변을 바라봐요.'],
-    milestoneTitle: (duration: string) => `${duration}이 지났어요.`,
+    milestoneTitle: (duration: string) =>
+      `${duration}${duration.endsWith('초') ? '가' : '이'} 지났어요.`,
     milestoneBodyLines: ['더 머물고 싶다면', '그대로 있어도 괜찮아요.'],
     milestoneActionLines: ['돌아오고 싶을 때', '화면을 눌러주세요.'],
   },
