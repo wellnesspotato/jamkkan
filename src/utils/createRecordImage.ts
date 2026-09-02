@@ -9,7 +9,7 @@ export async function createRecordImage(element: HTMLElement): Promise<Blob> {
     pixelRatio: 2,
   })
 
-  if (blob === null) {
+  if (blob === null || blob.size === 0 || blob.type !== 'image/png') {
     throw new Error('RecordCard PNG blob could not be created.')
   }
 

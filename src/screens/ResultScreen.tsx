@@ -20,28 +20,46 @@ function createImageFileName(startedAt: number | null) {
   return `jamkkan-${year}-${month}-${day}-${hours}${minutes}.png`
 }
 
-function supportsPngFileSharing() {
+async function createRecordFile(
+  element: HTMLElement,
+  startedAt: number | null,
+) {
+  const blob = await createRecordImage(element)
+  const file = new File([blob], createImageFileName(startedAt), {
+    type: 'image/png',
+  })
+
   if (
-    typeof navigator.share !== 'function' ||
-    typeof navigator.canShare !== 'function'
+    file.size === 0 ||
+    file.type !== 'image/png' ||
+    !file.name.endsWith('.png')
   ) {
-    return false
+    throw new Error('RecordCard PNG file could not be created.')
   }
 
-  try {
-    const testFile = new File([], 'jamkkan.png', { type: 'image/png' })
-    return navigator.canShare({ files: [testFile] })
-  } catch {
-    return false
-  }
+  return file
+}
+
+function isAbortError(error: unknown) {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    error.name === 'AbortError'
+  )
 }
 
 function ResultScreen({ session, onRestart }: ResultScreenProps) {
   const recordCardRef = useRef<HTMLElement>(null)
+  const fallbackImageFileRef = useRef<File>(null)
   const [isCreatingImage, setIsCreatingImage] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
   const [actionError, setActionError] = useState('')
-  const [canSharePngFiles] = useState(supportsPngFileSharing)
+  const [canUseWebShare, setCanUseWebShare] = useState(
+    () =>
+      typeof navigator !== 'undefined' &&
+      typeof navigator.share === 'function',
+  )
   const isBusy = isCreatingImage || isSharing
 
   const handleSaveImage = async () => {
@@ -53,7 +71,9 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
     setActionError('')
 
     try {
-      const blob = await createRecordImage(recordCardRef.current)
+      const blob =
+        fallbackImageFileRef.current ??
+        (await createRecordImage(recordCardRef.current))
       const imageUrl = URL.createObjectURL(blob)
       const downloadLink = document.createElement('a')
 
@@ -71,7 +91,7 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
   }
 
   const handleShare = async () => {
-    if (recordCardRef.current === null || isBusy) {
+    if (recordCardRef.current === null || !canUseWebShare || isBusy) {
       return
     }
 
@@ -79,30 +99,31 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
     setActionError('')
 
     try {
-      const blob = await createRecordImage(recordCardRef.current)
-      const file = new File(
-        [blob],
-        createImageFileName(session.startedAt),
-        { type: 'image/png' },
+      const file = await createRecordFile(
+        recordCardRef.current,
+        session.startedAt,
       )
+      fallbackImageFileRef.current = file
       const shareData: ShareData = { files: [file] }
 
       if (
         typeof navigator.share !== 'function' ||
-        typeof navigator.canShare !== 'function' ||
-        !navigator.canShare(shareData)
+        (typeof navigator.canShare === 'function' &&
+          !navigator.canShare(shareData))
       ) {
         setActionError(COPY.result.shareUnavailable)
+        setCanUseWebShare(false)
         return
       }
 
       await navigator.share(shareData)
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
+      if (isAbortError(error)) {
         return
       }
 
       setActionError(COPY.result.shareError)
+      setCanUseWebShare(false)
     } finally {
       setIsSharing(false)
     }
@@ -114,7 +135,7 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
         <RecordCard ref={recordCardRef} session={session} />
 
         <div className="result-controls">
-          {canSharePngFiles ? (
+          {canUseWebShare ? (
             <button
               className="share-button"
               type="button"
@@ -143,7 +164,7 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
           <p className="result-guidance">
             {COPY.result.privacy}
             <br />
-            {canSharePngFiles
+            {canUseWebShare
               ? COPY.result.saveHint
               : COPY.result.downloadHint}
           </p>
