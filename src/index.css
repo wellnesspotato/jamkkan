@@ -510,6 +510,70 @@ textarea {
   letter-spacing: 0.03em;
 }
 
+.keyword-size--large.keyword-font--sans {
+  font-size: 38px;
+}
+
+.keyword-size--medium.keyword-font--sans {
+  font-size: 32px;
+}
+
+.keyword-size--small.keyword-font--sans {
+  font-size: 27px;
+}
+
+.keyword-size--minimum.keyword-font--sans {
+  font-size: 24px;
+}
+
+.keyword-size--large.keyword-font--serif {
+  font-size: 38px;
+}
+
+.keyword-size--medium.keyword-font--serif {
+  font-size: 32px;
+}
+
+.keyword-size--small.keyword-font--serif {
+  font-size: 27px;
+}
+
+.keyword-size--minimum.keyword-font--serif {
+  font-size: 24px;
+}
+
+.keyword-size--large.keyword-font--daughter {
+  font-size: 38px;
+}
+
+.keyword-size--medium.keyword-font--daughter {
+  font-size: 32px;
+}
+
+.keyword-size--small.keyword-font--daughter {
+  font-size: 27px;
+}
+
+.keyword-size--minimum.keyword-font--daughter {
+  font-size: 24px;
+}
+
+.keyword-size--large.keyword-font--newlywed {
+  font-size: 38px;
+}
+
+.keyword-size--medium.keyword-font--newlywed {
+  font-size: 32px;
+}
+
+.keyword-size--small.keyword-font--newlywed {
+  font-size: 27px;
+}
+
+.keyword-size--minimum.keyword-font--newlywed {
+  font-size: 24px;
+}
+
 .keyword-input-zone {
   display: flex;
   width: 100%;

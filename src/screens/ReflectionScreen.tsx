@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { COPY } from '../constants/copy'
 import {
   getNextKeywordFont,
+  getKeywordSizeClass,
   KEYWORD_FONT_CLASS,
   preloadKeywordFont,
   preloadKeywordFonts,
@@ -107,7 +108,7 @@ function ReflectionScreen({
         >
           <div className="keyword-input-zone">
             <textarea
-              className={`reflection-keyword-input ${KEYWORD_FONT_CLASS[keywordFont]}`}
+              className={`reflection-keyword-input ${KEYWORD_FONT_CLASS[keywordFont]} ${getKeywordSizeClass(keyword)}`}
               id="keyword"
               value={keyword}
               maxLength={30}

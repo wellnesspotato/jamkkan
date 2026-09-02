@@ -1,7 +1,10 @@
 import { forwardRef } from 'react'
 import BrandLogo from './BrandLogo'
 import { COPY } from '../constants/copy'
-import { KEYWORD_FONT_CLASS } from '../constants/keywordFonts'
+import {
+  getKeywordSizeClass,
+  KEYWORD_FONT_CLASS,
+} from '../constants/keywordFonts'
 import { PAUSE_THEMES } from '../constants/themes'
 import type { PauseSession } from '../types/pause'
 
@@ -134,7 +137,9 @@ const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
         className="keyword-postit record-keyword-postit"
         style={{ backgroundColor: theme.postit }}
       >
-        <p className={`record-keyword ${KEYWORD_FONT_CLASS[session.keywordFont]}`}>
+        <p
+          className={`record-keyword ${KEYWORD_FONT_CLASS[session.keywordFont]} ${getKeywordSizeClass(session.keyword)}`}
+        >
           {session.keyword}
         </p>
       </div>

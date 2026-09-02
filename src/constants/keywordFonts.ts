@@ -14,6 +14,30 @@ export const KEYWORD_FONT_CLASS: Record<KeywordFont, string> = {
   newlywed: 'keyword-font--newlywed',
 }
 
+export type KeywordSize = 'large' | 'medium' | 'small' | 'minimum'
+
+export function getKeywordSizeClass(keyword: string) {
+  const length = keyword.trim().length
+
+  if (length === 0) {
+    return ''
+  }
+
+  if (length <= 4) {
+    return 'keyword-size--large'
+  }
+
+  if (length <= 8) {
+    return 'keyword-size--medium'
+  }
+
+  if (length <= 12) {
+    return 'keyword-size--small'
+  }
+
+  return 'keyword-size--minimum'
+}
+
 const KEYWORD_FONT_LOAD_VALUE: Record<KeywordFont, string> = {
   sans: '600 28px "Noto Sans KR"',
   serif: '500 29px "Noto Serif KR"',
