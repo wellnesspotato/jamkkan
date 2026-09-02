@@ -2,27 +2,36 @@ import { getFontEmbedCSS, toBlob } from 'html-to-image'
 
 export const RECORD_IMAGE_PIXEL_RATIO = 2
 
-let fontEmbedCssPromise: Promise<string> | null = null
+const fontEmbedCssPromises = new Map<string, Promise<string>>()
 
-async function getRecordImageFontEmbedCss(element: HTMLElement) {
-  await document.fonts.ready
+function getRecordImageFontEmbedCss(element: HTMLElement, fontCacheKey: string) {
+  const cachedPromise = fontEmbedCssPromises.get(fontCacheKey)
 
-  if (fontEmbedCssPromise === null) {
-    fontEmbedCssPromise = getFontEmbedCSS(element).catch((error) => {
-      fontEmbedCssPromise = null
-      throw error
-    })
+  if (cachedPromise !== undefined) {
+    return cachedPromise
   }
 
+  const fontEmbedCssPromise = getFontEmbedCSS(element).catch((error) => {
+    fontEmbedCssPromises.delete(fontCacheKey)
+    throw error
+  })
+
+  fontEmbedCssPromises.set(fontCacheKey, fontEmbedCssPromise)
   return fontEmbedCssPromise
 }
 
-export async function prepareRecordImageFonts(element: HTMLElement) {
-  await getRecordImageFontEmbedCss(element)
+export async function prepareRecordImageFonts(
+  element: HTMLElement,
+  fontCacheKey = 'default',
+) {
+  await getRecordImageFontEmbedCss(element, fontCacheKey)
 }
 
-export async function createRecordImage(element: HTMLElement): Promise<Blob> {
-  const fontEmbedCSS = await getRecordImageFontEmbedCss(element)
+export async function createRecordImage(
+  element: HTMLElement,
+  fontCacheKey = 'default',
+): Promise<Blob> {
+  const fontEmbedCSS = await getRecordImageFontEmbedCss(element, fontCacheKey)
   const backgroundColor = window.getComputedStyle(element).backgroundColor
 
   const blob = await toBlob(element, {

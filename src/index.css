@@ -103,6 +103,22 @@ main {
   text-align: center;
 }
 
+.reflection-screen,
+.result-screen {
+  display: block;
+  padding-top: calc(
+    max(var(--space-5), env(safe-area-inset-top)) + var(--space-1)
+  );
+  padding-bottom: calc(
+    max(var(--space-5), env(safe-area-inset-bottom)) + var(--space-6)
+  );
+}
+
+.reflection-screen .screen-content,
+.result-screen .screen-content {
+  margin-inline: auto;
+}
+
 h1,
 p {
   margin: 0;
@@ -307,12 +323,21 @@ button:focus-visible {
 }
 
 .reflection-question {
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-2);
+  margin-top: 0;
   color: var(--color-text-primary);
   font-size: var(--font-size-question);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-question);
-  text-align: center;
+  text-align: left;
+}
+
+.reflection-guide {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-supporting);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-supporting);
 }
 
 .reflection-keyword-postit {
@@ -539,8 +564,8 @@ textarea::placeholder {
 }
 
 .validation-message {
-  margin-top: var(--space-3);
-  color: var(--color-text-secondary);
+  margin-top: var(--space-2);
+  color: #a65f58;
   font-size: var(--font-size-supporting);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-supporting);
@@ -568,10 +593,29 @@ textarea::placeholder {
   width: 100%;
   padding: var(--space-5);
   border: 1px solid color-mix(in srgb, var(--color-divider) 65%, transparent);
-  border-radius: var(--radius-postit);
+  border-radius: var(--radius-16);
   background: var(--color-surface);
-  box-shadow: none;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-text-primary) 7%, transparent);
   text-align: left;
+  margin-top: 0;
+}
+
+.result-card-display {
+  margin: 0;
+}
+
+.share-capture-host {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  pointer-events: none;
+}
+
+.share-capture-wrapper {
+  width: 468px;
+  height: auto;
+  padding: 24px;
+  background: var(--color-background);
 }
 
 .record-card .brand-logo {
@@ -720,4 +764,5 @@ textarea::placeholder {
   line-height: var(--line-height-body);
   text-decoration: underline;
   text-underline-offset: 3px;
+  margin-top: 20px;
 }

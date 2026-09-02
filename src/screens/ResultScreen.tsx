@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import RecordCard from '../components/RecordCard'
+import RecordShareCard from '../components/RecordShareCard'
 import { COPY } from '../constants/copy'
+import { preloadKeywordFont } from '../constants/keywordFonts'
 import type { PauseSession } from '../types/pause'
 import {
   createRecordImage,
@@ -77,9 +79,27 @@ function isAbortError(error: unknown) {
   )
 }
 
+const RECORD_UI_FONT_LOAD_VALUES = [
+  '400 16px "Noto Sans KR"',
+  '500 14px "Noto Sans KR"',
+  '700 14px "Noto Sans KR"',
+] as const
+
+async function prepareVisibleRecordFonts(session: PauseSession) {
+  const uiFontPromises = RECORD_UI_FONT_LOAD_VALUES.map((font) =>
+    document.fonts.check(font)
+      ? Promise.resolve()
+      : document.fonts.load(font).then(() => undefined),
+  )
+
+  await Promise.all([preloadKeywordFont(session.keywordFont), ...uiFontPromises])
+}
+
 function ResultScreen({ session, onRestart }: ResultScreenProps) {
-  const recordCardRef = useRef<HTMLElement>(null)
+  const recordCardRef = useRef<HTMLDivElement>(null)
   const fallbackImageFileRef = useRef<File>(null)
+  const preparationPromiseRef = useRef<Promise<File> | null>(null)
+  const preparedImageKeyRef = useRef('')
   const [isCreatingImage, setIsCreatingImage] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
   const [actionError, setActionError] = useState('')
@@ -89,27 +109,186 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
       typeof navigator.share === 'function',
   )
   const isBusy = isCreatingImage || isSharing
+  const imageCacheKey = JSON.stringify([
+    session.startedAt,
+    session.endedAt,
+    session.durationMs,
+    session.keyword,
+    session.note,
+    session.place,
+    session.themeId,
+    session.keywordFont,
+  ])
+
+  const ensurePreparedFile = useCallback(
+    (source: 'pre-generation' | 'share-click' | 'save-click') => {
+      const captureElement = recordCardRef.current
+
+      if (captureElement === null) {
+        return Promise.reject(new Error('RecordShareCard is not available.'))
+      }
+
+      if (preparedImageKeyRef.current !== imageCacheKey) {
+        preparedImageKeyRef.current = imageCacheKey
+        fallbackImageFileRef.current = null
+        preparationPromiseRef.current = null
+      }
+
+      if (fallbackImageFileRef.current !== null) {
+        logShareDebug('cache-hit', { source })
+        return Promise.resolve(fallbackImageFileRef.current)
+      }
+
+      if (preparationPromiseRef.current !== null) {
+        logShareDebug('generation-promise-reused', { source })
+        return preparationPromiseRef.current
+      }
+
+      logShareDebug('cache-miss', { source })
+
+      const generationKey = imageCacheKey
+      const generationStartedAt = performance.now()
+      const preparationPromise = (async () => {
+        logShareDebug(
+          source === 'pre-generation'
+            ? 'pre-generation-start'
+            : 'generation-start',
+          { source },
+        )
+
+        const fontStartedAt = performance.now()
+        await prepareVisibleRecordFonts(session)
+        await prepareRecordImageFonts(captureElement, session.keywordFont)
+        const fontElapsedMs = performance.now() - fontStartedAt
+
+        logShareDebug('font-ready', {
+          source,
+          elapsedMs: fontElapsedMs,
+        })
+
+        const captureRect = captureElement.getBoundingClientRect()
+        const shareCardRect = captureElement
+          .querySelector<HTMLElement>('.record-card')
+          ?.getBoundingClientRect()
+        const captureStartedAt = performance.now()
+
+        logShareDebug('capture-start', {
+          source,
+          pixelRatio: RECORD_IMAGE_PIXEL_RATIO,
+        })
+
+        const blob = await createRecordImage(
+          captureElement,
+          session.keywordFont,
+        )
+        const captureElapsedMs = performance.now() - captureStartedAt
+
+        logShareDebug('capture-complete', {
+          source,
+          captureElapsedMs,
+          blobSize: blob.size,
+          blobType: blob.type,
+          captureWrapperWidth: captureRect.width,
+          captureWrapperHeight: captureRect.height,
+          recordShareCardWidth: shareCardRect?.width ?? 'unavailable',
+          recordShareCardHeight: shareCardRect?.height ?? 'unavailable',
+          outputWidth: Math.round(
+            captureRect.width * RECORD_IMAGE_PIXEL_RATIO,
+          ),
+          outputHeight: Math.round(
+            captureRect.height * RECORD_IMAGE_PIXEL_RATIO,
+          ),
+          pixelRatio: RECORD_IMAGE_PIXEL_RATIO,
+        })
+
+        const fileStartedAt = performance.now()
+        const file = createRecordFile(blob, session.startedAt)
+        const fileElapsedMs = performance.now() - fileStartedAt
+
+        logShareDebug('file-created', {
+          source,
+          blobFileElapsedMs: fileElapsedMs,
+          totalImageGenerationElapsedMs:
+            performance.now() - generationStartedAt,
+          fontReadyElapsedMs: fontElapsedMs,
+          captureElapsedMs,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+        })
+
+        if (preparedImageKeyRef.current === generationKey) {
+          fallbackImageFileRef.current = file
+        }
+
+        return file
+      })()
+
+      preparationPromiseRef.current = preparationPromise
+      void preparationPromise.then(
+        () => {
+          if (preparationPromiseRef.current === preparationPromise) {
+            preparationPromiseRef.current = null
+          }
+        },
+        (error) => {
+          if (preparationPromiseRef.current === preparationPromise) {
+            preparationPromiseRef.current = null
+          }
+          logShareDebug('generation-error', {
+            source,
+            totalImageGenerationElapsedMs:
+              performance.now() - generationStartedAt,
+            ...getErrorDetails(error),
+          })
+        },
+      )
+
+      return preparationPromise
+    },
+    [imageCacheKey, session],
+  )
 
   useEffect(() => {
-    if (recordCardRef.current === null) {
-      return
+    let isCancelled = false
+    let timeoutId: number | undefined
+    let idleCallbackId: number | undefined
+    let animationFrameId: number | undefined
+
+    const startPreparation = () => {
+      if (isCancelled) {
+        return
+      }
+
+      void ensurePreparedFile('pre-generation').catch(() => undefined)
     }
 
-    const fontStartedAt = performance.now()
+    if (typeof window.requestIdleCallback === 'function') {
+      idleCallbackId = window.requestIdleCallback(startPreparation, {
+        timeout: 250,
+      })
+    } else {
+      animationFrameId = window.requestAnimationFrame(() => {
+        timeoutId = window.setTimeout(startPreparation, 0)
+      })
+    }
 
-    void prepareRecordImageFonts(recordCardRef.current)
-      .then(() => {
-        logShareDebug('font-ready', {
-          elapsedMs: performance.now() - fontStartedAt,
-        })
-      })
-      .catch((error) => {
-        logShareDebug('font-error', {
-          elapsedMs: performance.now() - fontStartedAt,
-          ...getErrorDetails(error),
-        })
-      })
-  }, [])
+    return () => {
+      isCancelled = true
+
+      if (idleCallbackId !== undefined) {
+        window.cancelIdleCallback(idleCallbackId)
+      }
+
+      if (timeoutId !== undefined) {
+        window.clearTimeout(timeoutId)
+      }
+
+      if (animationFrameId !== undefined) {
+        window.cancelAnimationFrame(animationFrameId)
+      }
+    }
+  }, [ensurePreparedFile])
 
   const handleSaveImage = async () => {
     if (recordCardRef.current === null || isBusy) {
@@ -120,10 +299,8 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
     setActionError('')
 
     try {
-      const blob =
-        fallbackImageFileRef.current ??
-        (await createRecordImage(recordCardRef.current))
-      const imageUrl = URL.createObjectURL(blob)
+      const file = await ensurePreparedFile('save-click')
+      const imageUrl = URL.createObjectURL(file)
       const downloadLink = document.createElement('a')
 
       downloadLink.href = imageUrl
@@ -156,69 +333,19 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
     })
 
     try {
-      let file = fallbackImageFileRef.current
+      let file: File
 
-      if (file === null) {
-        const recordCardElement = recordCardRef.current
-        const recordCardRect = recordCardElement.getBoundingClientRect()
-        const imageStartedAt = performance.now()
-        let blob: Blob
-
-        try {
-          blob = await createRecordImage(recordCardElement)
-        } catch (error) {
-          logShareDebug('image-error', {
-            elapsedMs: performance.now() - shareStartedAt,
-            imageElapsedMs: performance.now() - imageStartedAt,
-            userActivation:
-              navigator.userActivation?.isActive ?? 'unsupported',
-            ...getErrorDetails(error),
-          })
-          setActionError(COPY.result.imageError)
-          setCanUseWebShare(false)
-          return
-        }
-
-        logShareDebug('image-created', {
+      try {
+        file = await ensurePreparedFile('share-click')
+      } catch (error) {
+        logShareDebug('image-error', {
           elapsedMs: performance.now() - shareStartedAt,
-          imageElapsedMs: performance.now() - imageStartedAt,
-          blobSize: blob.size,
-          blobType: blob.type,
-          recordCardWidth: recordCardRect.width,
-          recordCardHeight: recordCardRect.height,
-          outputWidth: Math.round(
-            recordCardRect.width * RECORD_IMAGE_PIXEL_RATIO,
-          ),
-          outputHeight: Math.round(
-            recordCardRect.height * RECORD_IMAGE_PIXEL_RATIO,
-          ),
-          pixelRatio: RECORD_IMAGE_PIXEL_RATIO,
-          userActivation:
-            navigator.userActivation?.isActive ?? 'unsupported',
+          userActivation: navigator.userActivation?.isActive ?? 'unsupported',
+          ...getErrorDetails(error),
         })
-
-        const fileStartedAt = performance.now()
-
-        try {
-          file = createRecordFile(blob, session.startedAt)
-        } catch (error) {
-          logShareDebug('file-error', {
-            elapsedMs: performance.now() - shareStartedAt,
-            ...getErrorDetails(error),
-          })
-          setActionError(COPY.result.imageError)
-          setCanUseWebShare(false)
-          return
-        }
-
-        fallbackImageFileRef.current = file
-        logShareDebug('file-created', {
-          elapsedMs: performance.now() - shareStartedAt,
-          fileElapsedMs: performance.now() - fileStartedAt,
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type,
-        })
+        setActionError(COPY.result.imageError)
+        setCanUseWebShare(false)
+        return
       }
 
       const shareData: ShareData = { files: [file] }
@@ -297,50 +424,58 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
   }
 
   return (
-    <main className="screen result-screen">
-      <div className="screen-content result-content">
-        <RecordCard ref={recordCardRef} session={session} />
+    <>
+      <main className="screen result-screen">
+        <div className="screen-content result-content">
+          <div className="result-card-display">
+            <RecordCard session={session} />
+          </div>
 
-        <div className="result-controls">
-          {canUseWebShare ? (
-            <button
-              className="share-button"
-              type="button"
-              disabled={isBusy}
-              onClick={handleShare}
-            >
-              {isSharing ? COPY.result.preparingShare : COPY.result.share}
-            </button>
-          ) : (
-            <button
-              className="save-image-button"
-              type="button"
-              disabled={isBusy}
-              onClick={handleSaveImage}
-            >
-              {isCreatingImage
-                ? COPY.result.preparingImage
-                : COPY.result.download}
-            </button>
-          )}
-          {actionError !== '' && (
-            <p className="image-error" aria-live="polite">
-              {actionError}
+          <div className="result-controls">
+            {canUseWebShare ? (
+              <button
+                className="share-button"
+                type="button"
+                disabled={isBusy}
+                onClick={handleShare}
+              >
+                {isSharing ? COPY.result.preparingShare : COPY.result.share}
+              </button>
+            ) : (
+              <button
+                className="save-image-button"
+                type="button"
+                disabled={isBusy}
+                onClick={handleSaveImage}
+              >
+                {isCreatingImage
+                  ? COPY.result.preparingImage
+                  : COPY.result.download}
+              </button>
+            )}
+            {actionError !== '' && (
+              <p className="image-error" aria-live="polite">
+                {actionError}
+              </p>
+            )}
+            <p className="result-guidance">
+              {COPY.result.privacy}
+              <br />
+              {canUseWebShare
+                ? COPY.result.saveHint
+                : COPY.result.downloadHint}
             </p>
-          )}
-          <p className="result-guidance">
-            {COPY.result.privacy}
-            <br />
-            {canUseWebShare
-              ? COPY.result.saveHint
-              : COPY.result.downloadHint}
-          </p>
-          <button className="restart-button" type="button" onClick={onRestart}>
-            {COPY.result.restart}
-          </button>
+            <button className="restart-button" type="button" onClick={onRestart}>
+              {COPY.result.restart}
+            </button>
+          </div>
         </div>
+      </main>
+
+      <div className="share-capture-host" aria-hidden="true">
+        <RecordShareCard ref={recordCardRef} session={session} />
       </div>
-    </main>
+    </>
   )
 }
 

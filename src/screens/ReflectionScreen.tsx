@@ -83,6 +83,7 @@ function ReflectionScreen({
         <label className="reflection-question" htmlFor="keyword">
           {COPY.reflection.question}
         </label>
+        <p className="reflection-guide">{COPY.reflection.guide}</p>
 
         <div
           className="keyword-postit reflection-keyword-postit"
@@ -149,14 +150,14 @@ function ReflectionScreen({
           )}
         </div>
 
+        <button className="reflection-submit" type="submit">
+          {COPY.reflection.submit}
+        </button>
         {validationMessage !== '' && (
           <p className="validation-message" aria-live="polite">
             {validationMessage}
           </p>
         )}
-        <button className="reflection-submit" type="submit">
-          {COPY.reflection.submit}
-        </button>
       </form>
     </main>
   )
