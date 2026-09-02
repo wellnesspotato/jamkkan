@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
 
 :root {
   --color-background: #f7f5ef;
@@ -21,6 +21,9 @@
   --radius-24: 24px;
   --radius-full: 9999px;
   --radius-postit: 4px;
+  --pause-logo-stage-height: 28px;
+  --pause-logo-hourglass-gap: var(--space-5);
+  --pause-hourglass-stage-height: 251px;
   --font-size-landing: 32px;
   --font-size-title: 24px;
   --font-size-question: 22px;
@@ -108,28 +111,60 @@ button:focus-visible {
   outline-offset: 3px;
 }
 
-.landing-content,
-.pause-content {
+.pause-shell {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  min-height: 100dvh;
+  padding: max(var(--space-5), env(safe-area-inset-top))
+    max(var(--space-5), env(safe-area-inset-right))
+    max(var(--space-5), env(safe-area-inset-bottom))
+    max(var(--space-5), env(safe-area-inset-left));
 }
 
-.landing-content {
-  width: min(100%, 320px);
+.logo-stage {
+  display: grid;
+  flex: 0 0 var(--pause-logo-stage-height);
+  place-items: start center;
 }
 
-.pause-content {
-  min-height: 340px;
-  justify-content: flex-start;
-}
-
-.landing-title {
-  margin-bottom: var(--space-7);
-  font-size: var(--font-size-landing);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-landing);
+.brand-logo {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
   letter-spacing: 0.02em;
+}
+
+.brand-logo__bold {
+  font-weight: 700;
+}
+
+.brand-logo__medium {
+  font-weight: var(--font-weight-medium);
+  margin-left: 1px;
+}
+
+.pause-layout {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.hourglass-stage {
+  display: grid;
+  flex: 0 0 var(--pause-hourglass-stage-height);
+  margin-top: var(--pause-logo-hourglass-gap);
+  place-items: center;
+}
+
+.message-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: min(100%, 320px);
+  padding-top: var(--space-7);
+  margin-inline: auto;
+  text-align: center;
 }
 
 .hourglass-button {
@@ -186,7 +221,7 @@ button:focus-visible {
 }
 
 .landing-instruction {
-  margin-top: var(--space-5);
+  margin: 0;
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-body);
@@ -210,7 +245,7 @@ button:focus-visible {
 
 .pause-intro,
 .pause-open-message {
-  margin-top: var(--space-7);
+  margin: 0;
   font-size: var(--font-size-supporting);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-supporting);

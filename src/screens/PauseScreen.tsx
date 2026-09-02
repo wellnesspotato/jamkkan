@@ -1,4 +1,5 @@
 import { useEffect, useState, type KeyboardEvent } from 'react'
+import BrandLogo from '../components/BrandLogo'
 import Hourglass from '../components/Hourglass'
 import { COPY } from '../constants/copy'
 import { formatDurationMinutes } from '../constants/pause'
@@ -142,41 +143,48 @@ function PauseScreen({
 
   return (
     <main
-      className={`screen pause-screen${hasReachedMinimum ? ' pause-screen--open' : ''}`}
+      className={`pause-shell pause-screen${hasReachedMinimum ? ' pause-screen--open' : ''}`}
       onClick={hasReachedMinimum ? onEnd : undefined}
       onKeyDown={handleKeyDown}
       role={hasReachedMinimum ? 'button' : undefined}
       tabIndex={hasReachedMinimum ? 0 : undefined}
     >
-      <div className="screen-content pause-content">
-        <Hourglass progress={progress} color={sandColor} />
-        {hasReachedMinimum ? (
-          <p className="pause-open-message">
-            <span>
-              {COPY.pause.milestoneTitle(
-                formatDurationMinutes(minimumDurationMinutes),
-              )}
-            </span>
-            <span>
-              {COPY.pause.milestoneBodyLines[0]}
+      <header className="logo-stage">
+        <BrandLogo />
+      </header>
+      <div className="pause-layout">
+        <div className="hourglass-stage">
+          <Hourglass progress={progress} color={sandColor} />
+        </div>
+        <div className="message-stage">
+          {hasReachedMinimum ? (
+            <p className="pause-open-message">
+              <span>
+                {COPY.pause.milestoneTitle(
+                  formatDurationMinutes(minimumDurationMinutes),
+                )}
+              </span>
+              <span>
+                {COPY.pause.milestoneBodyLines[0]}
+                <br />
+                {COPY.pause.milestoneBodyLines[1]}
+              </span>
+              <span>
+                {COPY.pause.milestoneActionLines[0]}
+                <br />
+                {COPY.pause.milestoneActionLines[1]}
+              </span>
+            </p>
+          ) : isIntroMounted ? (
+            <p
+              className={`pause-intro${isIntroFading ? ' pause-intro--fading' : ''}`}
+            >
+              {COPY.pause.initialLines[0]}
               <br />
-              {COPY.pause.milestoneBodyLines[1]}
-            </span>
-            <span>
-              {COPY.pause.milestoneActionLines[0]}
-              <br />
-              {COPY.pause.milestoneActionLines[1]}
-            </span>
-          </p>
-        ) : isIntroMounted ? (
-          <p
-            className={`pause-intro${isIntroFading ? ' pause-intro--fading' : ''}`}
-          >
-            {COPY.pause.initialLines[0]}
-            <br />
-            {COPY.pause.initialLines[1]}
-          </p>
-        ) : null}
+              {COPY.pause.initialLines[1]}
+            </p>
+          ) : null}
+        </div>
       </div>
     </main>
   )

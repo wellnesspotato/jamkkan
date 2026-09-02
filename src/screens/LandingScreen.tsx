@@ -1,3 +1,4 @@
+import BrandLogo from '../components/BrandLogo'
 import { useEffect, useRef, useState } from 'react'
 import Hourglass from '../components/Hourglass'
 import { COPY } from '../constants/copy'
@@ -108,37 +109,43 @@ function LandingScreen({
   }
 
   return (
-    <main className="screen landing-screen">
-      <div className="screen-content landing-content">
-        <h1 className="landing-title">{COPY.landing.title}</h1>
-        <button
-          className="hourglass-button"
-          type="button"
-          aria-label={COPY.landing.startAriaLabel}
-          onClick={handleStart}
-          disabled={isStarting}
-        >
-          <div ref={hourglassRef} className="hourglass-flip-layer">
-            <Hourglass progress={1} color={sandColor} />
-          </div>
-        </button>
-        <p className="landing-instruction">
-          {COPY.landing.instructionLines[0]}
-          <br />
-          {COPY.landing.instructionLines[1]}
-        </p>
-        {minimumDurationMinutes > 1 && (
-          <p className="session-duration-note">
-            {COPY.landing.longSession(
-              formatDurationMinutes(minimumDurationMinutes),
-            )}
+    <main className="pause-shell landing-screen">
+      <header className="logo-stage">
+        <BrandLogo />
+      </header>
+      <div className="pause-layout">
+        <div className="hourglass-stage">
+          <button
+            className="hourglass-button"
+            type="button"
+            aria-label={COPY.landing.startAriaLabel}
+            onClick={handleStart}
+            disabled={isStarting}
+          >
+            <div ref={hourglassRef} className="hourglass-flip-layer">
+              <Hourglass progress={1} color={sandColor} />
+            </div>
+          </button>
+        </div>
+        <div className="message-stage landing-message">
+          <p className="landing-instruction">
+            {COPY.landing.instructionLines[0]}
+            <br />
+            {COPY.landing.instructionLines[1]}
           </p>
-        )}
-        <p className="secondary-text">
-          {COPY.landing.supportingLines[0]}
-          <br />
-          {COPY.landing.supportingLines[1]}
-        </p>
+          {minimumDurationMinutes > 1 && (
+            <p className="session-duration-note">
+              {COPY.landing.longSession(
+                formatDurationMinutes(minimumDurationMinutes),
+              )}
+            </p>
+          )}
+          <p className="secondary-text">
+            {COPY.landing.supportingLines[0]}
+            <br />
+            {COPY.landing.supportingLines[1]}
+          </p>
+        </div>
       </div>
     </main>
   )
