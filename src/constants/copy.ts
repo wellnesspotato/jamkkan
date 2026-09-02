@@ -33,7 +33,7 @@ export const COPY = {
     title: '잠깐, 멈춘 기록',
     duration: (duration: string) => `${duration} 머물렀어요.`,
     place: (place: string) => `${place}에서`,
-    share: '이미지로 저장하기',
+    share: '공유하기',
     download: '이미지로 저장하기',
     preparingShare: '공유 준비 중...',
     preparingImage: '이미지 만드는 중...',
