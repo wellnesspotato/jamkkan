@@ -15,6 +15,8 @@ type ResultScreenProps = {
   onRestart: () => void
 }
 
+type SharePreparationState = 'preparing' | 'ready' | 'failed'
+
 function createImageFileName(startedAt: number | null) {
   const date = new Date(startedAt ?? Date.now())
   const year = date.getFullYear()
@@ -100,8 +102,11 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
   const fallbackImageFileRef = useRef<File>(null)
   const preparationPromiseRef = useRef<Promise<File> | null>(null)
   const preparedImageKeyRef = useRef('')
+  const hasLoggedResultMountRef = useRef(false)
   const [isCreatingImage, setIsCreatingImage] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
+  const [sharePreparationState, setSharePreparationState] =
+    useState<SharePreparationState>('preparing')
   const [actionError, setActionError] = useState('')
   const [canUseWebShare, setCanUseWebShare] = useState(
     () =>
@@ -251,44 +256,60 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
 
   useEffect(() => {
     let isCancelled = false
-    let timeoutId: number | undefined
-    let idleCallbackId: number | undefined
-    let animationFrameId: number | undefined
+    const preparationRequestedAt = performance.now()
 
-    const startPreparation = () => {
-      if (isCancelled) {
-        return
-      }
-
-      void ensurePreparedFile('pre-generation').catch(() => undefined)
-    }
-
-    if (typeof window.requestIdleCallback === 'function') {
-      idleCallbackId = window.requestIdleCallback(startPreparation, {
-        timeout: 250,
-      })
-    } else {
-      animationFrameId = window.requestAnimationFrame(() => {
-        timeoutId = window.setTimeout(startPreparation, 0)
+    if (!hasLoggedResultMountRef.current) {
+      hasLoggedResultMountRef.current = true
+      logShareDebug('result-mount', {
+        imageCacheKey,
       })
     }
+
+    setSharePreparationState('preparing')
+
+    void ensurePreparedFile('pre-generation')
+      .then((file) => {
+        if (isCancelled) {
+          return
+        }
+
+        logShareDebug('pre-generation-finished', {
+          elapsedMs: performance.now() - preparationRequestedAt,
+          fileSize: file.size,
+          fileType: file.type,
+        })
+        logShareDebug('prepared-file-ready', {
+          fileName: file.name,
+          fileSize: file.size,
+        })
+        setSharePreparationState('ready')
+      })
+      .catch((error) => {
+        if (isCancelled) {
+          return
+        }
+
+        setSharePreparationState('failed')
+        setActionError(COPY.result.imageError)
+        setCanUseWebShare(false)
+        logShareDebug('pre-generation-failed', {
+          elapsedMs: performance.now() - preparationRequestedAt,
+          ...getErrorDetails(error),
+        })
+      })
 
     return () => {
       isCancelled = true
-
-      if (idleCallbackId !== undefined) {
-        window.cancelIdleCallback(idleCallbackId)
-      }
-
-      if (timeoutId !== undefined) {
-        window.clearTimeout(timeoutId)
-      }
-
-      if (animationFrameId !== undefined) {
-        window.cancelAnimationFrame(animationFrameId)
-      }
     }
-  }, [ensurePreparedFile])
+  }, [ensurePreparedFile, imageCacheKey])
+
+  useEffect(() => {
+    if (canUseWebShare && sharePreparationState === 'ready') {
+      logShareDebug('share-button-enabled', {
+        hasPreparedFile: fallbackImageFileRef.current !== null,
+      })
+    }
+  }, [canUseWebShare, sharePreparationState])
 
   const handleSaveImage = async () => {
     if (recordCardRef.current === null || isBusy) {
@@ -317,37 +338,28 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
   }
 
   const handleShare = async () => {
-    if (recordCardRef.current === null || !canUseWebShare || isBusy) {
+    const file = fallbackImageFileRef.current
+
+    if (
+      file === null ||
+      sharePreparationState !== 'ready' ||
+      !canUseWebShare ||
+      isBusy
+    ) {
       return
     }
 
     setIsSharing(true)
     setActionError('')
     const shareStartedAt = performance.now()
-    const hadPreparedFile = fallbackImageFileRef.current !== null
 
-    logShareDebug('click', {
+    logShareDebug('share-click', {
       elapsedMs: 0,
-      hasPreparedFile: hadPreparedFile,
+      hasPreparedFile: true,
       userActivation: navigator.userActivation?.isActive ?? 'unsupported',
     })
 
     try {
-      let file: File
-
-      try {
-        file = await ensurePreparedFile('share-click')
-      } catch (error) {
-        logShareDebug('image-error', {
-          elapsedMs: performance.now() - shareStartedAt,
-          userActivation: navigator.userActivation?.isActive ?? 'unsupported',
-          ...getErrorDetails(error),
-        })
-        setActionError(COPY.result.imageError)
-        setCanUseWebShare(false)
-        return
-      }
-
       const shareData: ShareData = { files: [file] }
       let canShareFiles = true
 
@@ -375,19 +387,7 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
         return
       }
 
-      if (
-        !hadPreparedFile &&
-        navigator.userActivation !== undefined &&
-        !navigator.userActivation.isActive
-      ) {
-        logShareDebug('share-deferred', {
-          elapsedMs: performance.now() - shareStartedAt,
-          reason: 'transient-user-activation-expired',
-        })
-        return
-      }
-
-      logShareDebug('share-call', {
+      logShareDebug('navigator-share-call', {
         elapsedMs: performance.now() - shareStartedAt,
         userActivation: navigator.userActivation?.isActive ?? 'unsupported',
       })
@@ -408,10 +408,6 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
         })
 
         if (isAbortError(error)) {
-          return
-        }
-
-        if (!hadPreparedFile && errorDetails.name === 'NotAllowedError') {
           return
         }
 
@@ -436,10 +432,12 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
               <button
                 className="share-button"
                 type="button"
-                disabled={isBusy}
+                disabled={isBusy || sharePreparationState !== 'ready'}
                 onClick={handleShare}
               >
-                {isSharing ? COPY.result.preparingShare : COPY.result.share}
+                {sharePreparationState === 'ready'
+                  ? COPY.result.share
+                  : COPY.result.preparingShare}
               </button>
             ) : (
               <button
