@@ -1,4 +1,5 @@
 import { forwardRef } from 'react'
+import { COPY } from '../constants/copy'
 import { PAUSE_THEMES } from '../constants/themes'
 import type { PauseSession } from '../types/pause'
 
@@ -31,15 +32,15 @@ function formatDuration(durationMs: number) {
   const parts: string[] = []
 
   if (hours > 0) {
-    parts.push(`${hours}시간`)
+    parts.push(COPY.time.hours(hours))
   }
 
   if (minutes > 0) {
-    parts.push(`${minutes}분`)
+    parts.push(COPY.time.minutes(minutes))
   }
 
   if (seconds > 0 || parts.length === 0) {
-    parts.push(`${seconds}초`)
+    parts.push(COPY.time.seconds(seconds))
   }
 
   return parts.join(' ')
@@ -63,7 +64,7 @@ const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
       style={{ backgroundColor: theme.postit }}
     >
       <header className="record-card-header">
-        <h1 className="record-title">잠깐, 멈춘 기록</h1>
+        <h1 className="record-title">{COPY.result.title}</h1>
         {session.startedAt !== null && (
           <div className="record-time-block">
             <time className="record-date" dateTime={startedAtDateTime}>
@@ -82,7 +83,7 @@ const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
             )}
             {session.durationMs !== null && (
               <p className="record-duration">
-                {formatDuration(session.durationMs)} 머물렀어요.
+                {COPY.result.duration(formatDuration(session.durationMs))}
               </p>
             )}
           </div>
@@ -93,7 +94,7 @@ const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
 
       {session.note !== '' && <p className="record-note">{session.note}</p>}
       {session.place !== '' && (
-        <p className="record-place">{session.place}에서</p>
+        <p className="record-place">{COPY.result.place(session.place)}</p>
       )}
     </article>
   )

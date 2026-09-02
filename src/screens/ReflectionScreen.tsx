@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { COPY } from '../constants/copy'
 
 type ReflectionScreenProps = {
   keyword: string
@@ -27,7 +28,7 @@ function ReflectionScreen({
     const trimmedKeyword = keyword.trim()
 
     if (trimmedKeyword === '') {
-      setValidationMessage('짧게 하나만 남겨주세요.')
+      setValidationMessage(COPY.reflection.validationKeyword)
       return
     }
 
@@ -42,7 +43,7 @@ function ReflectionScreen({
       >
         <div className="postit" style={{ backgroundColor: postitColor }}>
           <label className="reflection-question" htmlFor="keyword">
-            방금 가장 눈에 들어온 것은 무엇이었나요?
+            {COPY.reflection.question}
           </label>
           <input
             className="reflection-keyword-input"
@@ -50,7 +51,7 @@ function ReflectionScreen({
             type="text"
             value={keyword}
             maxLength={30}
-            placeholder="예: 구름"
+            placeholder={COPY.reflection.keywordPlaceholder}
             onChange={(event) => {
               setKeyword(event.target.value)
               setValidationMessage('')
@@ -58,28 +59,28 @@ function ReflectionScreen({
           />
 
           <label className="field-label" htmlFor="note">
-            조금 더 남기고 싶다면
+            {COPY.reflection.noteLabel}
           </label>
           <textarea
             className="reflection-note-input"
             id="note"
             value={note}
             maxLength={100}
-            placeholder="생각보다 하늘이 빠르게 움직이고 있었다."
+            placeholder={COPY.reflection.notePlaceholder}
             onChange={(event) => setNote(event.target.value)}
           />
 
           {isPlaceVisible ? (
             <div className="place-field">
               <label className="field-label" htmlFor="place">
-                장소
+                {COPY.reflection.placeLabel}
               </label>
               <input
                 className="reflection-place-input"
                 id="place"
                 type="text"
                 value={place}
-                placeholder="예: 석촌호수"
+                placeholder={COPY.reflection.placePlaceholder}
                 onChange={(event) => setPlace(event.target.value)}
               />
             </div>
@@ -89,7 +90,7 @@ function ReflectionScreen({
               type="button"
               onClick={() => setIsPlaceVisible(true)}
             >
-              + 장소 남기기
+              {COPY.reflection.placeAction}
             </button>
           )}
         </div>
@@ -100,7 +101,7 @@ function ReflectionScreen({
           </p>
         )}
         <button className="reflection-submit" type="submit">
-          기록 남기기
+          {COPY.reflection.submit}
         </button>
       </form>
     </main>

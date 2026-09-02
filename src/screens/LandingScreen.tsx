@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Hourglass from '../components/Hourglass'
+import { COPY } from '../constants/copy'
 import { formatDurationMinutes } from '../constants/pause'
 
 const FLIP_DURATION_MS = 520
@@ -109,11 +110,11 @@ function LandingScreen({
   return (
     <main className="screen landing-screen">
       <div className="screen-content landing-content">
-        <h1 className="landing-title">잠깐명상</h1>
+        <h1 className="landing-title">{COPY.landing.title}</h1>
         <button
           className="hourglass-button"
           type="button"
-          aria-label="잠깐명상 시작하기"
+          aria-label={COPY.landing.startAriaLabel}
           onClick={handleStart}
           disabled={isStarting}
         >
@@ -122,19 +123,21 @@ function LandingScreen({
           </div>
         </button>
         <p className="landing-instruction">
-          화면을 터치해
+          {COPY.landing.instructionLines[0]}
           <br />
-          모래시계를 뒤집어보세요.
+          {COPY.landing.instructionLines[1]}
         </p>
         {minimumDurationMinutes > 1 && (
           <p className="session-duration-note">
-            {formatDurationMinutes(minimumDurationMinutes)} 동안 머물러요.
+            {COPY.landing.longSession(
+              formatDurationMinutes(minimumDurationMinutes),
+            )}
           </p>
         )}
         <p className="secondary-text">
-          휴대폰을 내려놓고
+          {COPY.landing.supportingLines[0]}
           <br />
-          잠깐 주변을 바라봐요.
+          {COPY.landing.supportingLines[1]}
         </p>
       </div>
     </main>

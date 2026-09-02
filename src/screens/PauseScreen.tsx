@@ -1,5 +1,6 @@
 import { useEffect, useState, type KeyboardEvent } from 'react'
 import Hourglass from '../components/Hourglass'
+import { COPY } from '../constants/copy'
 import { formatDurationMinutes } from '../constants/pause'
 
 type PauseScreenProps = {
@@ -132,23 +133,27 @@ function PauseScreen({
         <Hourglass progress={progress} color={sandColor} />
         {hasReachedMinimum ? (
           <p className="pause-open-message">
-            <span>{formatDurationMinutes(minimumDurationMinutes)}이 지났어요.</span>
             <span>
-              더 머물고 싶다면
-              <br />
-              그대로 있어도 괜찮아요.
+              {COPY.pause.milestoneTitle(
+                formatDurationMinutes(minimumDurationMinutes),
+              )}
             </span>
             <span>
-              돌아오고 싶을 때
+              {COPY.pause.milestoneBodyLines[0]}
               <br />
-              화면을 눌러주세요.
+              {COPY.pause.milestoneBodyLines[1]}
+            </span>
+            <span>
+              {COPY.pause.milestoneActionLines[0]}
+              <br />
+              {COPY.pause.milestoneActionLines[1]}
             </span>
           </p>
         ) : (
           <p className="pause-intro">
-            휴대폰을 내려놓고
+            {COPY.pause.initialLines[0]}
             <br />
-            잠깐 주변을 바라봐요.
+            {COPY.pause.initialLines[1]}
           </p>
         )}
       </div>

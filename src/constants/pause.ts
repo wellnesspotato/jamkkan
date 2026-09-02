@@ -1,3 +1,5 @@
+import { COPY } from './copy'
+
 export const DEFAULT_MINIMUM_DURATION_MINUTES = 1
 export const MAXIMUM_DURATION_MINUTES = 180
 
@@ -22,10 +24,10 @@ export function formatDurationMinutes(minutes: number) {
   const remainingMinutes = minutes % 60
 
   if (hours === 0) {
-    return `${minutes}분`
+    return COPY.time.minutes(minutes)
   }
 
   return remainingMinutes === 0
-    ? `${hours}시간`
-    : `${hours}시간 ${remainingMinutes}분`
+    ? COPY.time.hours(hours)
+    : `${COPY.time.hours(hours)} ${COPY.time.minutes(remainingMinutes)}`
 }

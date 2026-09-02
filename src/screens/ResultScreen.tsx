@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import RecordCard from '../components/RecordCard'
+import { COPY } from '../constants/copy'
 import type { PauseSession } from '../types/pause'
 import { createRecordImage } from '../utils/createRecordImage'
 
@@ -63,7 +64,7 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
       downloadLink.remove()
       window.setTimeout(() => URL.revokeObjectURL(imageUrl), 1_000)
     } catch {
-      setActionError('이미지를 만들지 못했어요. 다시 한 번 시도해주세요.')
+      setActionError(COPY.result.imageError)
     } finally {
       setIsCreatingImage(false)
     }
@@ -91,7 +92,7 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
         typeof navigator.canShare !== 'function' ||
         !navigator.canShare(shareData)
       ) {
-        setActionError('이미지로 저장해 직접 공유할 수 있어요.')
+        setActionError(COPY.result.shareUnavailable)
         return
       }
 
@@ -101,9 +102,7 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
         return
       }
 
-      setActionError(
-        '공유하지 못했어요. 이미지로 저장해 직접 공유할 수 있어요.',
-      )
+      setActionError(COPY.result.shareError)
     } finally {
       setIsSharing(false)
     }
@@ -122,7 +121,7 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
               disabled={isBusy}
               onClick={handleShare}
             >
-              {isSharing ? '공유 준비 중...' : '공유하기'}
+              {isSharing ? COPY.result.preparingShare : COPY.result.share}
             </button>
           ) : (
             <button
@@ -131,7 +130,9 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
               disabled={isBusy}
               onClick={handleSaveImage}
             >
-              {isCreatingImage ? '이미지 만드는 중...' : '이미지로 저장하기'}
+              {isCreatingImage
+                ? COPY.result.preparingImage
+                : COPY.result.download}
             </button>
           )}
           {actionError !== '' && (
@@ -140,14 +141,14 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
             </p>
           )}
           <p className="result-guidance">
-            이 기록은 이곳에 저장되지 않아요.
+            {COPY.result.privacy}
             <br />
             {canSharePngFiles
-              ? '공유 메뉴에서 이미지를 저장할 수도 있어요.'
-              : '남겨두고 싶다면 이미지로 가져가세요.'}
+              ? COPY.result.saveHint
+              : COPY.result.downloadHint}
           </p>
           <button className="restart-button" type="button" onClick={onRestart}>
-            처음으로
+            {COPY.result.restart}
           </button>
         </div>
       </div>

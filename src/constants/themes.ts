@@ -30,4 +30,9 @@ export const PAUSE_THEMES: PauseTheme[] = [
     sand: '#ADA7BA',
     postit: '#D5D0DD',
   },
+  {
+    id: 'soft-clay',
+    sand: '#B58F75',
+    postit: '#D8C0AE',
+  },
 ]
