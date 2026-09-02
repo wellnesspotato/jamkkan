@@ -13,7 +13,7 @@ export const COPY = {
     milestoneActionLines: ['돌아오고 싶을 때', '화면을 눌러주세요.'],
   },
   reflection: {
-    question: '방금 가장 눈에 들어온 것은 무엇이었나요?',
+    question: '눈에 들어온 것은 무엇이었나요?',
     keywordPlaceholder: '예: 구름',
     noteLabel: '조금 더 남기고 싶다면',
     notePlaceholder: '생각보다 하늘이 빠르게 움직이고 있었다.',

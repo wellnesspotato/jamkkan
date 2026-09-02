@@ -218,7 +218,12 @@ button:focus-visible {
 
 .pause-intro {
   color: var(--color-text-secondary);
-  animation: pause-intro-fade 1s ease 3.5s forwards;
+  opacity: 1;
+  transition: opacity 500ms ease;
+}
+
+.pause-intro--fading {
+  opacity: 0;
 }
 
 .pause-open-message span {
@@ -309,11 +314,15 @@ textarea {
 
 .reflection-keyword-input {
   padding: var(--space-2) 0 var(--space-4);
-  border-bottom-color: var(--color-divider);
+  border-color: transparent;
   font-size: var(--font-size-keyword);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-keyword);
   text-align: center;
+  background: transparent;
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .reflection-note-input {
@@ -323,6 +332,18 @@ textarea {
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-body);
+  background: transparent;
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.reflection-keyword-input:focus,
+.reflection-note-input:focus {
+  border-color: transparent;
+  outline: none;
+  box-shadow: none;
+  opacity: 0.92;
 }
 
 .reflection-place-input {
@@ -523,15 +544,9 @@ textarea::placeholder {
   text-underline-offset: 3px;
 }
 
-@keyframes pause-intro-fade {
-  to {
-    opacity: 0;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .pause-intro {
-    animation: none;
+    transition: none;
   }
 
 }
