@@ -28,12 +28,37 @@ function formatDate(startedAt: number) {
   return `${year}.${month}.${day} ${weekdays[date.getDay()]}`
 }
 
-function formatTime(timestamp: number) {
-  return new Intl.DateTimeFormat('ko-KR', {
+function formatTime(timestamp: number, includePeriod = true) {
+  const parts = new Intl.DateTimeFormat('ko-KR', {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-  }).format(new Date(timestamp))
+  }).formatToParts(new Date(timestamp))
+  const period = parts.find(({ type }) => type === 'dayPeriod')?.value ?? ''
+  const hour = parts.find(({ type }) => type === 'hour')?.value ?? ''
+  const minute = parts.find(({ type }) => type === 'minute')?.value ?? ''
+
+  return includePeriod ? `${period} ${hour}:${minute}` : `${hour}:${minute}`
+}
+
+function formatTimeRange(startedAt: number, endedAt: number) {
+  const startParts = new Intl.DateTimeFormat('ko-KR', {
+    hour: 'numeric',
+    hour12: true,
+  }).formatToParts(new Date(startedAt))
+  const endParts = new Intl.DateTimeFormat('ko-KR', {
+    hour: 'numeric',
+    hour12: true,
+  }).formatToParts(new Date(endedAt))
+  const startPeriod =
+    startParts.find(({ type }) => type === 'dayPeriod')?.value ?? ''
+  const endPeriod =
+    endParts.find(({ type }) => type === 'dayPeriod')?.value ?? ''
+
+  return `${formatTime(startedAt)} - ${formatTime(
+    endedAt,
+    startPeriod !== endPeriod,
+  )}`
 }
 
 function formatDuration(durationMs: number) {
@@ -89,18 +114,17 @@ const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
           </time>
           {session.endedAt !== null && (
             <p className="record-time-range">
+              {session.durationMs !== null && (
+                <>
+                  <span className="record-duration">
+                    {formatDuration(session.durationMs)}
+                  </span>
+                  <span aria-hidden="true"> · </span>
+                </>
+              )}
               <time dateTime={startedAtDateTime}>
-                {formatTime(session.startedAt)}
+                {formatTimeRange(session.startedAt, session.endedAt)}
               </time>
-              <span aria-hidden="true"> - </span>
-              <time dateTime={endedAtDateTime}>
-                {formatTime(session.endedAt)}
-              </time>
-            </p>
-          )}
-          {session.durationMs !== null && (
-            <p className="record-duration">
-              {COPY.result.duration(formatDuration(session.durationMs))}
             </p>
           )}
         </div>

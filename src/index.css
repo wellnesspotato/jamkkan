@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500&display=swap');
 
 @font-face {
   font-family: "NanumURiDdarSonGeurSsi";
@@ -117,6 +117,84 @@ main {
 .reflection-screen .screen-content,
 .result-screen .screen-content {
   margin-inline: auto;
+}
+
+.result-preparation-overlay {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: max(var(--space-5), env(safe-area-inset-top))
+    max(var(--space-5), env(safe-area-inset-right))
+    max(var(--space-5), env(safe-area-inset-bottom))
+    max(var(--space-5), env(safe-area-inset-left));
+  background: color-mix(
+    in srgb,
+    var(--color-background) 76%,
+    transparent
+  );
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  place-items: center;
+}
+
+.result-preparation-status {
+  width: min(100%, 280px);
+  text-align: center;
+}
+
+.result-preparation-spinner {
+  display: block;
+  width: 24px;
+  height: 24px;
+  margin: 0 auto var(--space-4);
+  border: 1.5px solid var(--color-divider);
+  border-top-color: var(--color-text-secondary);
+  border-radius: var(--radius-full);
+  -webkit-transform-origin: center;
+  transform-origin: center;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform;
+  -webkit-animation: result-preparation-spin 0.9s linear infinite;
+  animation: result-preparation-spin 0.9s linear infinite;
+}
+
+.result-preparation-title {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-title);
+}
+
+.result-preparation-description {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-supporting);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-supporting);
+}
+
+@-webkit-keyframes result-preparation-spin {
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes result-preparation-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result-preparation-spinner {
+    -webkit-animation: none;
+    animation: none;
+  }
 }
 
 h1,
@@ -675,12 +753,13 @@ textarea::placeholder {
 }
 
 .record-duration {
-  margin-top: var(--space-1);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
 }
 
 .record-keyword-postit {
   width: var(--record-content-width);
-  margin: var(--space-5) 0 0;
+  margin: var(--space-4) 0 0;
 }
 
 .record-keyword {

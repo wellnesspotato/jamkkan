@@ -30,10 +30,15 @@ export const COPY = {
     fontCycleAria: '글씨체 바꾸기',
     submit: '기록 남기기',
   },
+  preparingResult: {
+    title: '기록을 정리하고 있어요.',
+    description: '잠시만 기다려주세요.',
+    error: '기록 이미지를 만들지 못했어요.',
+  },
   result: {
     title: '잠깐, 멈춘 기록',
     instagramHandle: '@jamkkan.pause',
-    duration: (duration: string) => `${duration} 머물렀어요.`,
+    duration: (duration: string) => duration,
     place: (place: string) => `${place}에서`,
     share: '공유하기',
     download: '이미지로 저장하기',

@@ -14,6 +14,8 @@ type ReflectionScreenProps = {
   place: string
   keywordFont: KeywordFont
   postitColor: string
+  isPreparingResult: boolean
+  preparationError: string
   onComplete: (
     keyword: string,
     note: string,
@@ -29,6 +31,8 @@ function ReflectionScreen({
   place: initialPlace,
   keywordFont,
   postitColor,
+  isPreparingResult,
+  preparationError,
   onComplete,
   onKeywordFontChange,
 }: ReflectionScreenProps) {
@@ -45,6 +49,10 @@ function ReflectionScreen({
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
+    if (isPreparingResult) {
+      return
+    }
+
     if ((event.nativeEvent as SubmitEvent).submitter === null) {
       return
     }
@@ -54,6 +62,10 @@ function ReflectionScreen({
     if (trimmedKeyword === '') {
       setValidationMessage(COPY.reflection.validationKeyword)
       return
+    }
+
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
     }
 
     onComplete(trimmedKeyword, note.trim(), place.trim(), keywordFont)
@@ -75,9 +87,13 @@ function ReflectionScreen({
   }
 
   return (
-    <main className="screen reflection-screen">
+    <main
+      className="screen reflection-screen"
+      aria-busy={isPreparingResult}
+    >
       <form
         className="screen-content reflection-form"
+        inert={isPreparingResult}
         onSubmit={handleSubmit}
       >
         <label className="reflection-question" htmlFor="keyword">
@@ -158,7 +174,30 @@ function ReflectionScreen({
             {validationMessage}
           </p>
         )}
+        {preparationError !== '' && (
+          <p className="validation-message" aria-live="polite">
+            {preparationError}
+          </p>
+        )}
       </form>
+
+      {isPreparingResult && (
+        <div className="result-preparation-overlay">
+          <div
+            className="result-preparation-status"
+            role="status"
+            aria-live="polite"
+          >
+            <span className="result-preparation-spinner" aria-hidden="true" />
+            <p className="result-preparation-title">
+              {COPY.preparingResult.title}
+            </p>
+            <p className="result-preparation-description">
+              {COPY.preparingResult.description}
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

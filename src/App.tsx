@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import ResultPreparation from './components/ResultPreparation'
+import { COPY } from './constants/copy'
 import { getMinimumDurationMinutes } from './constants/pause'
 import { PAUSE_THEMES } from './constants/themes'
 import LandingScreen from './screens/LandingScreen'
@@ -6,6 +8,11 @@ import PauseScreen from './screens/PauseScreen'
 import ReflectionScreen from './screens/ReflectionScreen'
 import ResultScreen from './screens/ResultScreen'
 import type { KeywordFont, PausePhase, PauseSession } from './types/pause'
+import {
+  getRecordImageFontEmbedStatus,
+  prewarmRecordImageFonts,
+} from './utils/createRecordImage'
+import { logShareDebug } from './utils/shareDebug'
 
 const initialSession: PauseSession = {
   startedAt: null,
@@ -30,6 +37,9 @@ function getRandomTheme(excludedThemeId?: string) {
 function App() {
   const [phase, setPhase] = useState<PausePhase>('landing')
   const [session, setSession] = useState<PauseSession>(initialSession)
+  const [preparedShareFile, setPreparedShareFile] = useState<File | null>(null)
+  const [isPreparingResult, setIsPreparingResult] = useState(false)
+  const [resultPreparationError, setResultPreparationError] = useState('')
   const [currentTheme, setCurrentTheme] = useState(() => getRandomTheme())
   const [minimumDurationMinutes] = useState(() =>
     getMinimumDurationMinutes(window.location.search),
@@ -39,6 +49,13 @@ function App() {
   const handleStart = () => {
     const startedAt = Date.now()
 
+    logShareDebug('meditation-start', {
+      startedAt,
+    })
+
+    setPreparedShareFile(null)
+    setIsPreparingResult(false)
+    setResultPreparationError('')
     setSession({
       startedAt,
       endedAt: null,
@@ -50,6 +67,12 @@ function App() {
       keywordFont: 'sans',
     })
     setPhase('pausing')
+
+    window.requestAnimationFrame(() => {
+      window.setTimeout(() => {
+        void prewarmRecordImageFonts()
+      }, 0)
+    })
   }
 
   const handleSessionEnd = () => {
@@ -65,11 +88,17 @@ function App() {
       endedAt,
       durationMs,
     }))
+    logShareDebug('reflection-entered', {
+      elapsedMs: durationMs,
+    })
     setPhase('reflection')
   }
 
   const handleRestart = () => {
     setSession(initialSession)
+    setPreparedShareFile(null)
+    setIsPreparingResult(false)
+    setResultPreparationError('')
     setCurrentTheme((theme) => getRandomTheme(theme.id))
     setPhase('landing')
   }
@@ -80,6 +109,25 @@ function App() {
     place: string,
     keywordFont: KeywordFont,
   ) => {
+    const fontEmbedStatus = getRecordImageFontEmbedStatus()
+
+    logShareDebug('reflection-submit', {
+      keywordFont,
+      hasNote: note.trim() !== '',
+      hasPlace: place.trim() !== '',
+    })
+    logShareDebug('record-submit', {
+      keywordFont,
+      fontEmbedCacheHit: fontEmbedStatus === 'ready',
+      fontEmbedSource:
+        fontEmbedStatus === 'ready'
+          ? 'prewarmed'
+          : fontEmbedStatus === 'in-flight'
+            ? 'in-flight-promise'
+            : 'generated',
+    })
+    setPreparedShareFile(null)
+    setResultPreparationError('')
     setSession((currentSession) => ({
       ...currentSession,
       keyword,
@@ -87,7 +135,18 @@ function App() {
       place,
       keywordFont,
     }))
+    setIsPreparingResult(true)
+  }
+
+  const handleResultPrepared = (file: File) => {
+    setPreparedShareFile(file)
+    setIsPreparingResult(false)
     setPhase('result')
+  }
+
+  const handleResultPreparationError = () => {
+    setIsPreparingResult(false)
+    setResultPreparationError(COPY.preparingResult.error)
   }
 
   if (phase === 'pausing') {
@@ -110,27 +169,39 @@ function App() {
       PAUSE_THEMES.find(({ id }) => id === session.themeId) ?? PAUSE_THEMES[0]
 
     return (
-      <ReflectionScreen
-        keyword={session.keyword}
-        note={session.note}
-        place={session.place}
-        keywordFont={session.keywordFont}
-        postitColor={theme.postit}
-        onComplete={handleReflectionComplete}
-        onKeywordFontChange={(keywordFont) => {
-          setSession((currentSession) => ({
-            ...currentSession,
-            keywordFont,
-          }))
-        }}
-      />
+      <>
+        <ReflectionScreen
+          keyword={session.keyword}
+          note={session.note}
+          place={session.place}
+          keywordFont={session.keywordFont}
+          postitColor={theme.postit}
+          isPreparingResult={isPreparingResult}
+          preparationError={resultPreparationError}
+          onComplete={handleReflectionComplete}
+          onKeywordFontChange={(keywordFont) => {
+            setSession((currentSession) => ({
+              ...currentSession,
+              keywordFont,
+            }))
+          }}
+        />
+        {isPreparingResult && (
+          <ResultPreparation
+            session={session}
+            onPrepared={handleResultPrepared}
+            onError={handleResultPreparationError}
+          />
+        )}
+      </>
     )
   }
 
-  if (phase === 'result') {
+  if (phase === 'result' && preparedShareFile !== null) {
     return (
       <ResultScreen
         session={session}
+        preparedShareFile={preparedShareFile}
         onRestart={handleRestart}
       />
     )

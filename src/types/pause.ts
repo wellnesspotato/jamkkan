@@ -1,4 +1,8 @@
-export type PausePhase = 'landing' | 'pausing' | 'reflection' | 'result'
+export type PausePhase =
+  | 'landing'
+  | 'pausing'
+  | 'reflection'
+  | 'result'
 
 export type KeywordFont = 'sans' | 'serif' | 'daughter' | 'newlywed'
 
