@@ -1,4 +1,3 @@
-import BrandLogo from '../components/BrandLogo'
 import { useRef } from 'react'
 import Hourglass from '../components/Hourglass'
 import { COPY } from '../constants/copy'
@@ -28,9 +27,6 @@ function LandingScreen({
 
   return (
     <main className="pause-shell landing-screen">
-      <header className="logo-stage">
-        <BrandLogo />
-      </header>
       <div className="pause-layout">
         <div className="hourglass-stage">
           <button

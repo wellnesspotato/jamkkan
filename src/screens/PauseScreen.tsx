@@ -1,5 +1,4 @@
 import { useEffect, useState, type KeyboardEvent } from 'react'
-import BrandLogo from '../components/BrandLogo'
 import Hourglass from '../components/Hourglass'
 import { COPY } from '../constants/copy'
 import { formatDurationMinutes } from '../constants/pause'
@@ -130,9 +129,6 @@ function PauseScreen({
       role={hasReachedMinimum ? 'button' : undefined}
       tabIndex={hasReachedMinimum ? 0 : undefined}
     >
-      <header className="logo-stage">
-        <BrandLogo />
-      </header>
       <div className="pause-layout">
         <div className="hourglass-stage">
           <Hourglass progress={progress} color={sandColor} />

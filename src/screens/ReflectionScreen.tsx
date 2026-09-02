@@ -41,10 +41,14 @@ function ReflectionScreen({
         className="screen-content reflection-form"
         onSubmit={handleSubmit}
       >
-        <div className="postit" style={{ backgroundColor: postitColor }}>
-          <label className="reflection-question" htmlFor="keyword">
-            {COPY.reflection.question}
-          </label>
+        <label className="reflection-question" htmlFor="keyword">
+          {COPY.reflection.question}
+        </label>
+
+        <div
+          className="keyword-postit reflection-keyword-postit"
+          style={{ backgroundColor: postitColor }}
+        >
           <input
             className="reflection-keyword-input"
             id="keyword"
@@ -57,8 +61,10 @@ function ReflectionScreen({
               setValidationMessage('')
             }}
           />
+        </div>
 
-          <label className="field-label" htmlFor="note">
+        <div className="reflection-details">
+          <label className="field-label reflection-note-label" htmlFor="note">
             {COPY.reflection.noteLabel}
           </label>
           <textarea
