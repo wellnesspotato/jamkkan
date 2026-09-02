@@ -37,6 +37,9 @@
   --radius-24: 24px;
   --radius-full: 9999px;
   --radius-postit: 4px;
+  --result-card-max-width: 420px;
+  --share-capture-padding: 24px;
+  --share-capture-gutter: 48px;
   --pause-top-breathing: 28px;
   --pause-hourglass-stage-offset: 32px;
   --pause-hourglass-stage-height: 280px;
@@ -663,7 +666,7 @@ textarea::placeholder {
 }
 
 .result-content {
-  width: min(100%, 420px);
+  width: min(100%, var(--result-card-max-width));
 }
 
 .record-card {
@@ -690,9 +693,14 @@ textarea::placeholder {
 }
 
 .share-capture-wrapper {
-  width: 468px;
+  width: calc(
+    min(
+        var(--result-card-max-width),
+        calc(100vw - var(--share-capture-gutter))
+      ) + var(--share-capture-gutter)
+  );
   height: auto;
-  padding: 24px;
+  padding: var(--share-capture-padding);
   background: var(--color-background);
 }
 

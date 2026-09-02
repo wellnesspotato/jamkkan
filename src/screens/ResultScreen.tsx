@@ -14,6 +14,8 @@ type ResultScreenProps = {
   onRestart: () => void
 }
 
+let scrollResetSessionId: number | null = null
+
 function canSharePreparedFile(file: File) {
   if (
     typeof navigator === 'undefined' ||
@@ -38,6 +40,14 @@ function ResultScreen({
   onRestart,
 }: ResultScreenProps) {
   useLayoutEffect(() => {
+    if (
+      session.startedAt === null ||
+      scrollResetSessionId === session.startedAt
+    ) {
+      return
+    }
+
+    scrollResetSessionId = session.startedAt
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
 
     const scrollingElement = document.scrollingElement
@@ -46,7 +56,7 @@ function ResultScreen({
       scrollingElement.scrollTop = 0
       scrollingElement.scrollLeft = 0
     }
-  }, [])
+  }, [session.startedAt])
 
   const hasLoggedResultPhaseRef = useRef(false)
   const [isSharing, setIsSharing] = useState(false)
