@@ -310,12 +310,9 @@ textarea::placeholder {
   background: var(--text-primary);
 }
 
-.save-image-button {
-  margin-top: 0;
-}
-
+.save-image-button,
 .share-button {
-  margin-top: 12px;
+  margin-top: 0;
 }
 
 .save-image-button:disabled,

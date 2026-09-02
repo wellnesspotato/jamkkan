@@ -115,15 +115,7 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
         <RecordCard ref={recordCardRef} session={session} />
 
         <div className="result-controls">
-          <button
-            className="save-image-button"
-            type="button"
-            disabled={isBusy}
-            onClick={handleSaveImage}
-          >
-            {isCreatingImage ? '이미지 만드는 중...' : '이미지로 저장하기'}
-          </button>
-          {canSharePngFiles && (
+          {canSharePngFiles ? (
             <button
               className="share-button"
               type="button"
@@ -131,6 +123,15 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
               onClick={handleShare}
             >
               {isSharing ? '공유 준비 중...' : '공유하기'}
+            </button>
+          ) : (
+            <button
+              className="save-image-button"
+              type="button"
+              disabled={isBusy}
+              onClick={handleSaveImage}
+            >
+              {isCreatingImage ? '이미지 만드는 중...' : '이미지로 저장하기'}
             </button>
           )}
           {actionError !== '' && (
@@ -141,7 +142,9 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
           <p className="result-guidance">
             이 기록은 이곳에 저장되지 않아요.
             <br />
-            남겨두고 싶다면 이미지로 가져가세요.
+            {canSharePngFiles
+              ? '공유 메뉴에서 이미지를 저장할 수도 있어요.'
+              : '남겨두고 싶다면 이미지로 가져가세요.'}
           </p>
           <button className="restart-button" type="button" onClick={onRestart}>
             처음으로
