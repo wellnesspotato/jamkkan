@@ -1,8 +1,12 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import RecordCard from '../components/RecordCard'
 import { COPY } from '../constants/copy'
 import type { PauseSession } from '../types/pause'
-import { createRecordImage } from '../utils/createRecordImage'
+import {
+  createRecordImage,
+  prepareRecordImageFonts,
+  RECORD_IMAGE_PIXEL_RATIO,
+} from '../utils/createRecordImage'
 
 type ResultScreenProps = {
   session: PauseSession
@@ -20,16 +24,13 @@ function createImageFileName(startedAt: number | null) {
   return `jamkkan-${year}-${month}-${day}-${hours}${minutes}.png`
 }
 
-async function createRecordFile(
-  element: HTMLElement,
-  startedAt: number | null,
-) {
-  const blob = await createRecordImage(element)
+function createRecordFile(blob: Blob, startedAt: number | null) {
   const file = new File([blob], createImageFileName(startedAt), {
     type: 'image/png',
   })
 
   if (
+    !(file instanceof File) ||
     file.size === 0 ||
     file.type !== 'image/png' ||
     !file.name.endsWith('.png')
@@ -38,6 +39,33 @@ async function createRecordFile(
   }
 
   return file
+}
+
+function getErrorDetails(error: unknown) {
+  if (typeof error !== 'object' || error === null) {
+    return {
+      name: 'UnknownError',
+      message: String(error),
+      isDomException: false,
+    }
+  }
+
+  return {
+    name: 'name' in error ? String(error.name) : 'UnknownError',
+    message: 'message' in error ? String(error.message) : '',
+    isDomException:
+      typeof DOMException !== 'undefined' && error instanceof DOMException,
+  }
+}
+
+function isShareDebugEnabled() {
+  return new URLSearchParams(window.location.search).get('shareDebug') === '1'
+}
+
+function logShareDebug(step: string, details: Record<string, unknown>) {
+  if (isShareDebugEnabled()) {
+    console.info(`[jamkkan share] ${step}`, details)
+  }
 }
 
 function isAbortError(error: unknown) {
@@ -61,6 +89,27 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
       typeof navigator.share === 'function',
   )
   const isBusy = isCreatingImage || isSharing
+
+  useEffect(() => {
+    if (recordCardRef.current === null) {
+      return
+    }
+
+    const fontStartedAt = performance.now()
+
+    void prepareRecordImageFonts(recordCardRef.current)
+      .then(() => {
+        logShareDebug('font-ready', {
+          elapsedMs: performance.now() - fontStartedAt,
+        })
+      })
+      .catch((error) => {
+        logShareDebug('font-error', {
+          elapsedMs: performance.now() - fontStartedAt,
+          ...getErrorDetails(error),
+        })
+      })
+  }, [])
 
   const handleSaveImage = async () => {
     if (recordCardRef.current === null || isBusy) {
@@ -97,33 +146,151 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
 
     setIsSharing(true)
     setActionError('')
+    const shareStartedAt = performance.now()
+    const hadPreparedFile = fallbackImageFileRef.current !== null
+
+    logShareDebug('click', {
+      elapsedMs: 0,
+      hasPreparedFile: hadPreparedFile,
+      userActivation: navigator.userActivation?.isActive ?? 'unsupported',
+    })
 
     try {
-      const file = await createRecordFile(
-        recordCardRef.current,
-        session.startedAt,
-      )
-      fallbackImageFileRef.current = file
-      const shareData: ShareData = { files: [file] }
+      let file = fallbackImageFileRef.current
 
-      if (
-        typeof navigator.share !== 'function' ||
-        (typeof navigator.canShare === 'function' &&
-          !navigator.canShare(shareData))
-      ) {
+      if (file === null) {
+        const recordCardElement = recordCardRef.current
+        const recordCardRect = recordCardElement.getBoundingClientRect()
+        const imageStartedAt = performance.now()
+        let blob: Blob
+
+        try {
+          blob = await createRecordImage(recordCardElement)
+        } catch (error) {
+          logShareDebug('image-error', {
+            elapsedMs: performance.now() - shareStartedAt,
+            imageElapsedMs: performance.now() - imageStartedAt,
+            userActivation:
+              navigator.userActivation?.isActive ?? 'unsupported',
+            ...getErrorDetails(error),
+          })
+          setActionError(COPY.result.imageError)
+          setCanUseWebShare(false)
+          return
+        }
+
+        logShareDebug('image-created', {
+          elapsedMs: performance.now() - shareStartedAt,
+          imageElapsedMs: performance.now() - imageStartedAt,
+          blobSize: blob.size,
+          blobType: blob.type,
+          recordCardWidth: recordCardRect.width,
+          recordCardHeight: recordCardRect.height,
+          outputWidth: Math.round(
+            recordCardRect.width * RECORD_IMAGE_PIXEL_RATIO,
+          ),
+          outputHeight: Math.round(
+            recordCardRect.height * RECORD_IMAGE_PIXEL_RATIO,
+          ),
+          pixelRatio: RECORD_IMAGE_PIXEL_RATIO,
+          userActivation:
+            navigator.userActivation?.isActive ?? 'unsupported',
+        })
+
+        const fileStartedAt = performance.now()
+
+        try {
+          file = createRecordFile(blob, session.startedAt)
+        } catch (error) {
+          logShareDebug('file-error', {
+            elapsedMs: performance.now() - shareStartedAt,
+            ...getErrorDetails(error),
+          })
+          setActionError(COPY.result.imageError)
+          setCanUseWebShare(false)
+          return
+        }
+
+        fallbackImageFileRef.current = file
+        logShareDebug('file-created', {
+          elapsedMs: performance.now() - shareStartedAt,
+          fileElapsedMs: performance.now() - fileStartedAt,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+        })
+      }
+
+      const shareData: ShareData = { files: [file] }
+      let canShareFiles = true
+
+      try {
+        canShareFiles =
+          typeof navigator.canShare !== 'function' ||
+          navigator.canShare(shareData)
+      } catch (error) {
+        canShareFiles = false
+        logShareDebug('can-share-error', {
+          elapsedMs: performance.now() - shareStartedAt,
+          ...getErrorDetails(error),
+        })
+      }
+
+      logShareDebug('can-share', {
+        elapsedMs: performance.now() - shareStartedAt,
+        result: canShareFiles,
+        userActivation: navigator.userActivation?.isActive ?? 'unsupported',
+      })
+
+      if (typeof navigator.share !== 'function' || !canShareFiles) {
         setActionError(COPY.result.shareUnavailable)
         setCanUseWebShare(false)
         return
       }
 
-      await navigator.share(shareData)
-    } catch (error) {
-      if (isAbortError(error)) {
+      if (
+        !hadPreparedFile &&
+        navigator.userActivation !== undefined &&
+        !navigator.userActivation.isActive
+      ) {
+        logShareDebug('share-deferred', {
+          elapsedMs: performance.now() - shareStartedAt,
+          reason: 'transient-user-activation-expired',
+        })
         return
       }
 
-      setActionError(COPY.result.shareError)
-      setCanUseWebShare(false)
+      logShareDebug('share-call', {
+        elapsedMs: performance.now() - shareStartedAt,
+        userActivation: navigator.userActivation?.isActive ?? 'unsupported',
+      })
+
+      try {
+        await navigator.share(shareData)
+        logShareDebug('share-success', {
+          elapsedMs: performance.now() - shareStartedAt,
+        })
+      } catch (error) {
+        const errorDetails = getErrorDetails(error)
+
+        logShareDebug('share-error', {
+          elapsedMs: performance.now() - shareStartedAt,
+          userActivation:
+            navigator.userActivation?.isActive ?? 'unsupported',
+          ...errorDetails,
+        })
+
+        if (isAbortError(error)) {
+          return
+        }
+
+        if (!hadPreparedFile && errorDetails.name === 'NotAllowedError') {
+          return
+        }
+
+        setActionError(COPY.result.shareError)
+        setCanUseWebShare(false)
+      }
     } finally {
       setIsSharing(false)
     }
