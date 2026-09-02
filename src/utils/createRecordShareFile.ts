@@ -1,4 +1,8 @@
-import { preloadKeywordFont } from '../constants/keywordFonts'
+import {
+  getKeywordFontLoadValue,
+  KEYWORD_FONT_FAMILY,
+  loadKeywordFontForText,
+} from '../constants/keywordFonts'
 import type { PauseSession } from '../types/pause'
 import {
   createRecordImage,
@@ -32,9 +36,13 @@ function getSessionCacheKey(session: PauseSession) {
 async function prepareVisibleRecordFonts(session: PauseSession) {
   const visibleFontsStartedAt = performance.now()
   const selectedFontStartedAt = performance.now()
-  const selectedFontPromise = preloadKeywordFont(session.keywordFont).then(
-    () => performance.now() - selectedFontStartedAt,
-  )
+  const selectedFontPromise = loadKeywordFontForText(
+    session.keywordFont,
+    session.keyword,
+  ).then((isReady) => ({
+    isReady,
+    elapsedMs: performance.now() - selectedFontStartedAt,
+  }))
   const uiFontStartedAt = performance.now()
   const uiFontPromise = Promise.all(
     RECORD_UI_FONT_LOAD_VALUES.map((font) =>
@@ -44,14 +52,41 @@ async function prepareVisibleRecordFonts(session: PauseSession) {
     ),
   ).then(() => performance.now() - uiFontStartedAt)
 
-  const [selectedFontReadyElapsedMs, uiFontReadyElapsedMs] =
+  const [selectedFontResult, uiFontReadyElapsedMs] =
     await Promise.all([selectedFontPromise, uiFontPromise])
 
+  if (!selectedFontResult.isReady) {
+    throw new Error('Selected keyword font glyphs are not ready.')
+  }
+
   return {
-    selectedFontReadyElapsedMs,
+    selectedFontReadyElapsedMs: selectedFontResult.elapsedMs,
     uiFontReadyElapsedMs,
     visibleFontsReadyElapsedMs: performance.now() - visibleFontsStartedAt,
   }
+}
+
+function waitForPaintFrames(frameCount = 2) {
+  return new Promise<void>((resolve) => {
+    const waitForNextFrame = (remainingFrames: number) => {
+      window.requestAnimationFrame(() => {
+        if (remainingFrames <= 1) {
+          resolve()
+          return
+        }
+
+        waitForNextFrame(remainingFrames - 1)
+      })
+    }
+
+    waitForNextFrame(frameCount)
+  })
+}
+
+function countEmbeddedFontFaces(fontEmbedCSS: string, family: string) {
+  return (fontEmbedCSS.match(/@font-face\s*{[^}]*}/g) ?? []).filter((rule) =>
+    rule.includes(family),
+  ).length
 }
 
 function getCapturePixelRatio() {
@@ -128,7 +163,15 @@ async function generateRecordShareFile(
     cacheHit: fontEmbedCacheHit,
     source: fontEmbedSource,
     cssLength: fontEmbedCSS.length,
+    selectedFontFaceCount: countEmbeddedFontFaces(
+      fontEmbedCSS,
+      KEYWORD_FONT_FAMILY[session.keywordFont],
+    ),
   })
+
+  const paintSyncStartedAt = performance.now()
+  await waitForPaintFrames()
+  const paintSyncElapsedMs = performance.now() - paintSyncStartedAt
 
   const layoutStartedAt = performance.now()
   const captureRect = captureElement.getBoundingClientRect()
@@ -139,6 +182,31 @@ async function generateRecordShareFile(
   const outputWidth = Math.round(captureRect.width * pixelRatio)
   const outputHeight = Math.round(captureRect.height * pixelRatio)
   const outputPixelCount = outputWidth * outputHeight
+  const keywordElement = captureElement.querySelector<HTMLElement>(
+    '.record-keyword',
+  )
+  const keywordComputedStyle =
+    keywordElement === null ? null : window.getComputedStyle(keywordElement)
+  const keywordFontLoadValue = getKeywordFontLoadValue(session.keywordFont)
+  const keywordFontCheck = document.fonts.check(
+    keywordFontLoadValue,
+    session.keyword,
+  )
+
+  if (!keywordFontCheck) {
+    throw new Error('Selected keyword font was not ready before capture.')
+  }
+
+  logShareDebug('capture-keyword-font-ready', {
+    keywordText: keywordElement?.textContent ?? '',
+    selectedKeywordFont: session.keywordFont,
+    selectedKeywordFontFamily: KEYWORD_FONT_FAMILY[session.keywordFont],
+    computedFontFamily: keywordComputedStyle?.fontFamily ?? 'unavailable',
+    computedFontWeight: keywordComputedStyle?.fontWeight ?? 'unavailable',
+    computedFontSize: keywordComputedStyle?.fontSize ?? 'unavailable',
+    fontCheck: keywordFontCheck,
+    paintSyncElapsedMs,
+  })
 
   logShareDebug('capture-layout-ready', {
     elapsedMs: layoutElapsedMs,
@@ -200,6 +268,7 @@ async function generateRecordShareFile(
     fontEmbedElapsedMs,
     fontEmbedCacheHit,
     fontEmbedSource,
+    paintSyncElapsedMs,
     layoutElapsedMs,
     captureElapsedMs,
     fileName: file.name,

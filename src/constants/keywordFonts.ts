@@ -21,6 +21,17 @@ const KEYWORD_FONT_LOAD_VALUE: Record<KeywordFont, string> = {
   newlywed: '400 35px "NanumSinHonBuBu"',
 }
 
+export const KEYWORD_FONT_FAMILY: Record<KeywordFont, string> = {
+  sans: 'Noto Sans KR',
+  serif: 'Noto Serif KR',
+  daughter: 'NanumURiDdarSonGeurSsi',
+  newlywed: 'NanumSinHonBuBu',
+}
+
+export function getKeywordFontLoadValue(font: KeywordFont) {
+  return KEYWORD_FONT_LOAD_VALUE[font]
+}
+
 const keywordFontLoadPromises = new Map<KeywordFont, Promise<void>>()
 
 export function getNextKeywordFont(currentFont: KeywordFont): KeywordFont {
@@ -48,6 +59,24 @@ export function preloadKeywordFont(font: KeywordFont) {
   keywordFontLoadPromises.set(font, fontLoadPromise)
 
   return fontLoadPromise
+}
+
+export async function loadKeywordFontForText(
+  font: KeywordFont,
+  text: string,
+) {
+  if (typeof document === 'undefined' || !('fonts' in document)) {
+    return true
+  }
+
+  const fontValue = KEYWORD_FONT_LOAD_VALUE[font]
+
+  if (document.fonts.check(fontValue, text)) {
+    return true
+  }
+
+  await document.fonts.load(fontValue, text)
+  return document.fonts.check(fontValue, text)
 }
 
 export function preloadKeywordFonts() {

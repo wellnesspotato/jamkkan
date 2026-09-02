@@ -1,6 +1,7 @@
 import { getFontEmbedCSS, toBlob } from 'html-to-image'
+import { KEYWORD_FONT_FAMILY } from '../constants/keywordFonts'
 import type { KeywordFont } from '../types/pause'
-import { logShareDebug } from './shareDebug'
+import { isShareDebugEnabled, logShareDebug } from './shareDebug'
 
 export const RECORD_IMAGE_PIXEL_RATIO = 2
 
@@ -16,12 +17,8 @@ let fontEmbedPromiseOrigin: 'prewarmed' | 'generated' | null = null
 let fontEmbedCacheOrigin: 'prewarmed' | 'generated' | null = null
 const fontEmbedVariantCache = new Map<KeywordFont, string>()
 
-const KEYWORD_FONT_FAMILY: Record<KeywordFont, string> = {
-  sans: 'Noto Sans KR',
-  serif: 'Noto Serif KR',
-  daughter: 'NanumURiDdarSonGeurSsi',
-  newlywed: 'NanumSinHonBuBu',
-}
+const GOOGLE_FONT_CSS_URL =
+  'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500&display=swap'
 
 function getFontEmbedCssForKeywordFont(
   allFontEmbedCSS: string,
@@ -41,6 +38,12 @@ function getFontEmbedCssForKeywordFont(
         rule.includes('Noto Sans KR') || rule.includes(selectedFamily),
     )
     .join('\n')
+
+  if (!selectedCSS.includes(selectedFamily)) {
+    throw new Error(
+      `Embedded CSS does not include the selected keyword font: ${selectedFamily}`,
+    )
+  }
 
   fontEmbedVariantCache.set(keywordFont, selectedCSS)
   return selectedCSS
@@ -69,13 +72,91 @@ function createFontEmbedProbe() {
   return probe
 }
 
-function startFontEmbedCssGeneration(origin: 'prewarmed' | 'generated') {
+function generateFontEmbedCssInWorker() {
+  return new Promise<string>((resolve, reject) => {
+    const worker = new Worker(
+      new URL('./recordFontEmbed.worker.ts', import.meta.url),
+      { type: 'module' },
+    )
+
+    worker.onmessage = (
+      event: MessageEvent<
+        | {
+            type: 'progress'
+            step: string
+            elapsedMs: number
+            resourceCount?: number
+          }
+        | {
+            type: 'complete'
+            css: string
+            elapsedMs: number
+            resourceCount: number
+          }
+        | { type: 'error'; message: string }
+      >,
+    ) => {
+      if (event.data.type === 'progress') {
+        logShareDebug('font-prewarm-worker-progress', event.data)
+        return
+      }
+
+      worker.terminate()
+
+      if (event.data.type === 'complete') {
+        logShareDebug('font-prewarm-worker-complete', {
+          elapsedMs: event.data.elapsedMs,
+          resourceCount: event.data.resourceCount,
+        })
+        resolve(event.data.css)
+        return
+      }
+
+      reject(new Error(event.data.message))
+    }
+
+    worker.onerror = (event) => {
+      worker.terminate()
+      reject(new Error(event.message || 'Font embed worker failed.'))
+    }
+
+    worker.postMessage({
+      googleCssUrl: GOOGLE_FONT_CSS_URL,
+      daughterFontUrl: new URL(
+        '../assets/NanumURiDdarSonGeurSsi.woff2',
+        import.meta.url,
+      ).href,
+      newlywedFontUrl: new URL(
+        '../assets/NanumSinHonBuBu.woff2',
+        import.meta.url,
+      ).href,
+    })
+  })
+}
+
+function generateFontEmbedCssOnMainThread() {
   const probe = createFontEmbedProbe()
+
+  return getFontEmbedCSS(probe, {
+    preferredFontFormat: 'woff2',
+  }).finally(() => {
+    probe.remove()
+  })
+}
+
+function startFontEmbedCssGeneration(origin: 'prewarmed' | 'generated') {
   fontEmbedPromiseOrigin = origin
 
-  const promise = getFontEmbedCSS(probe, {
-    preferredFontFormat: 'woff2',
-  })
+  const promise = generateFontEmbedCssInWorker()
+    .catch((workerError) => {
+      logShareDebug('font-prewarm-worker-fallback', {
+        message:
+          workerError instanceof Error
+            ? workerError.message
+            : String(workerError),
+      })
+      return generateFontEmbedCssOnMainThread()
+    })
     .then((fontEmbedCSS) => {
       fontEmbedCssCache = fontEmbedCSS
       fontEmbedCssPromise = null
@@ -88,12 +169,38 @@ function startFontEmbedCssGeneration(origin: 'prewarmed' | 'generated') {
       fontEmbedPromiseOrigin = null
       throw error
     })
-    .finally(() => {
-      probe.remove()
-    })
 
   fontEmbedCssPromise = promise
   return promise
+}
+
+function observePrewarmLongTasks() {
+  if (
+    !isShareDebugEnabled() ||
+    typeof PerformanceObserver === 'undefined' ||
+    !PerformanceObserver.supportedEntryTypes.includes('longtask')
+  ) {
+    return () => undefined
+  }
+
+  let count = 0
+  let longestTaskMs = 0
+  const observer = new PerformanceObserver((list) => {
+    list.getEntries().forEach((entry) => {
+      count += 1
+      longestTaskMs = Math.max(longestTaskMs, entry.duration)
+    })
+  })
+
+  observer.observe({ entryTypes: ['longtask'] })
+
+  return () => {
+    observer.disconnect()
+    logShareDebug('font-prewarm-main-thread-tasks', {
+      count,
+      longestTaskMs,
+    })
+  }
 }
 
 export function prewarmRecordImageFonts() {
@@ -112,11 +219,13 @@ export function prewarmRecordImageFonts() {
   }
 
   const prewarmStartedAt = performance.now()
+  const stopLongTaskObserver = observePrewarmLongTasks()
   logShareDebug('font-embed-prewarm-start')
 
   const promise = startFontEmbedCssGeneration('prewarmed')
   void promise.then(
     (fontEmbedCSS) => {
+      stopLongTaskObserver()
       logShareDebug('font-embed-prewarm-complete', {
         prewarmElapsedMs: performance.now() - prewarmStartedAt,
         cssLength: fontEmbedCSS.length,
@@ -135,6 +244,7 @@ export function prewarmRecordImageFonts() {
       })
     },
     (error) => {
+      stopLongTaskObserver()
       logShareDebug('font-embed-prewarm-failed', {
         prewarmElapsedMs: performance.now() - prewarmStartedAt,
         message: error instanceof Error ? error.message : String(error),

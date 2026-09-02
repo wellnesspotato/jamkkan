@@ -48,6 +48,7 @@ function App() {
 
   const handleStart = () => {
     const startedAt = Date.now()
+    const interactionStartedAt = performance.now()
 
     logShareDebug('meditation-start', {
       startedAt,
@@ -69,6 +70,9 @@ function App() {
     setPhase('pausing')
 
     window.requestAnimationFrame(() => {
+      logShareDebug('first-hourglass-paint', {
+        elapsedMs: performance.now() - interactionStartedAt,
+      })
       window.setTimeout(() => {
         void prewarmRecordImageFonts()
       }, 0)
