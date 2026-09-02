@@ -633,6 +633,24 @@ textarea::placeholder {
   width: var(--record-content-width);
 }
 
+.record-card-header--share {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.record-card-header--share .brand-logo {
+  width: auto;
+}
+
+.record-card-instagram {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-caption);
+  white-space: nowrap;
+}
+
 .record-time-block {
   width: var(--record-content-width);
   display: flex;

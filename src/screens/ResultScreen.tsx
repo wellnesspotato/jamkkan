@@ -428,7 +428,7 @@ function ResultScreen({ session, onRestart }: ResultScreenProps) {
       <main className="screen result-screen">
         <div className="screen-content result-content">
           <div className="result-card-display">
-            <RecordCard session={session} />
+            <RecordCard session={session} showInstagramHandle />
           </div>
 
           <div className="result-controls">

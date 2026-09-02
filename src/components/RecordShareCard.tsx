@@ -10,7 +10,7 @@ const RecordShareCard = forwardRef<HTMLDivElement, RecordShareCardProps>(
   function RecordShareCard({ session }, ref) {
     return (
       <div ref={ref} className="share-capture-wrapper">
-        <RecordCard session={session} />
+        <RecordCard session={session} showInstagramHandle />
       </div>
     )
   },

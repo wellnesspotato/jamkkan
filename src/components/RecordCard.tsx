@@ -7,6 +7,7 @@ import type { PauseSession } from '../types/pause'
 
 type RecordCardProps = {
   session: PauseSession
+  showInstagramHandle?: boolean
 }
 
 function formatDate(startedAt: number) {
@@ -58,7 +59,7 @@ function formatDuration(durationMs: number) {
 }
 
 const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
-  { session },
+  { session, showInstagramHandle = false },
   ref,
 ) {
   const theme =
@@ -70,8 +71,15 @@ const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
 
   return (
     <article ref={ref} className="record-card">
-      <header className="record-card-header">
+      <header
+        className={`record-card-header${showInstagramHandle ? ' record-card-header--share' : ''}`}
+      >
         <BrandLogo />
+        {showInstagramHandle && (
+          <span className="record-card-instagram">
+            {COPY.result.instagramHandle}
+          </span>
+        )}
       </header>
 
       {session.startedAt !== null && (

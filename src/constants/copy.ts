@@ -32,6 +32,7 @@ export const COPY = {
   },
   result: {
     title: '잠깐, 멈춘 기록',
+    instagramHandle: '@jamkkan.pause',
     duration: (duration: string) => `${duration} 머물렀어요.`,
     place: (place: string) => `${place}에서`,
     share: '공유하기',
