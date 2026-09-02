@@ -338,14 +338,6 @@ textarea {
   appearance: none;
 }
 
-.reflection-keyword-input:focus,
-.reflection-note-input:focus {
-  border-color: transparent;
-  outline: none;
-  box-shadow: none;
-  opacity: 0.92;
-}
-
 .reflection-place-input {
   height: 48px;
   padding: 0 var(--space-4);
@@ -354,12 +346,18 @@ textarea {
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-body);
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
+.reflection-keyword-input:focus,
+.reflection-note-input:focus,
 .reflection-place-input:focus {
-  border-color: var(--color-text-primary);
-  outline-width: 1px;
-  outline-offset: 1px;
+  border-color: transparent;
+  outline: none;
+  box-shadow: none;
+  opacity: 0.92;
 }
 
 input::placeholder,
