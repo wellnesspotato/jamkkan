@@ -344,9 +344,10 @@ button:focus-visible {
   --hourglass-frame-shadow: #352c27;
   --hourglass-glass-stroke: color-mix(
     in srgb,
-    var(--color-text-secondary) 24%,
+    var(--color-text-secondary) 20%,
     transparent
   );
+  --hourglass-glass-inner-edge: rgba(255, 255, 255, 0.24);
   --hourglass-glass-highlight: rgba(255, 255, 255, 0.48);
   display: block;
   width: 100%;
@@ -355,7 +356,14 @@ button:focus-visible {
 
 .hourglass-glass-body {
   stroke: var(--hourglass-glass-stroke);
-  stroke-width: 0.8;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+
+.hourglass-glass-inner-edge {
+  fill: none;
+  stroke: var(--hourglass-glass-inner-edge);
+  stroke-width: 0.7;
   stroke-linejoin: round;
 }
 

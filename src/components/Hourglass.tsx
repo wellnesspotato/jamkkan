@@ -12,7 +12,8 @@ type HourglassProps = {
 function Hourglass({ progress, color }: HourglassProps) {
   const idPrefix = useId().replaceAll(':', '')
   const clipPathId = `${idPrefix}-glass-clip`
-  const frameGradientId = `${idPrefix}-frame-gradient`
+  const frameRailGradientId = `${idPrefix}-frame-rail-gradient`
+  const framePostGradientId = `${idPrefix}-frame-post-gradient`
   const glassGradientId = `${idPrefix}-glass-gradient`
   const normalizedProgress = Math.min(Math.max(progress, 0), 1)
   const sandHeight = 52
@@ -54,9 +55,16 @@ function Hourglass({ progress, color }: HourglassProps) {
       focusable="false"
     >
       <defs>
-        <linearGradient id={frameGradientId} x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={frameRailGradientId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="var(--hourglass-frame-highlight)" />
-          <stop offset="0.48" stopColor="var(--hourglass-frame-base)" />
+          <stop offset="0.42" stopColor="var(--hourglass-frame-base)" />
+          <stop offset="0.72" stopColor="var(--hourglass-frame-base)" />
+          <stop offset="1" stopColor="var(--hourglass-frame-shadow)" />
+        </linearGradient>
+        <linearGradient id={framePostGradientId} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="var(--hourglass-frame-highlight)" />
+          <stop offset="0.38" stopColor="var(--hourglass-frame-base)" />
+          <stop offset="0.68" stopColor="var(--hourglass-frame-base)" />
           <stop offset="1" stopColor="var(--hourglass-frame-shadow)" />
         </linearGradient>
         <linearGradient id={glassGradientId} x1="0" y1="0" x2="1" y2="0">
@@ -102,16 +110,19 @@ function Hourglass({ progress, color }: HourglassProps) {
         />
       )}
 
-      <g className="hourglass-glass-highlights" clipPath={`url(#${clipPathId})`}>
-        <path d="M38 34C39 47 44 59 52 68" />
-        <path d="M52 92C44 102 39 115 38 126" />
+      <g className="hourglass-glass-front">
+        <path className="hourglass-glass-inner-edge" d={glassPath} />
+        <g className="hourglass-glass-highlights" clipPath={`url(#${clipPathId})`}>
+          <path d="M38.5 35C39.5 47 44 58.5 51.5 67" />
+          <path d="M51.5 93C44 102.5 39.5 114 38.5 125" />
+        </g>
       </g>
 
       <g className="hourglass-frame">
-        <rect x="17" y="17" width="86" height="8" rx="3" fill={`url(#${frameGradientId})`} />
-        <rect x="17" y="135" width="86" height="8" rx="3" fill={`url(#${frameGradientId})`} />
-        <rect x="21" y="23" width="7" height="114" rx="2.5" fill={`url(#${frameGradientId})`} />
-        <rect x="92" y="23" width="7" height="114" rx="2.5" fill={`url(#${frameGradientId})`} />
+        <rect x="21.5" y="23" width="6" height="114" rx="3" fill={`url(#${framePostGradientId})`} />
+        <rect x="92.5" y="23" width="6" height="114" rx="3" fill={`url(#${framePostGradientId})`} />
+        <rect x="17" y="17" width="86" height="8" rx="4" fill={`url(#${frameRailGradientId})`} />
+        <rect x="17" y="135" width="86" height="8" rx="4" fill={`url(#${frameRailGradientId})`} />
       </g>
     </svg>
   )
