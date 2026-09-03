@@ -7,6 +7,7 @@ import {
 } from '../constants/keywordFonts'
 import { PAUSE_THEMES } from '../constants/themes'
 import type { PauseSession } from '../types/pause'
+import { getTimeOfDay, getTimeOfDayOverride } from '../utils/timeOfDay'
 
 type RecordCardProps = {
   session: PauseSession
@@ -44,22 +45,8 @@ function formatTime(timestamp: number, includePeriod = true) {
   return includePeriod ? `${period} ${hour}:${minute}` : `${hour}:${minute}`
 }
 
-function getTimeOfDay(timestamp: number) {
-  const hour = new Date(timestamp).getHours()
-
-  if (hour >= 5 && hour < 12) {
-    return 'morning'
-  }
-
-  if (hour >= 12 && hour < 18) {
-    return 'afternoon'
-  }
-
-  return 'evening'
-}
-
 function TimeOfDayIcon({ timestamp, color }: { timestamp: number; color: string }) {
-  const timeOfDay = getTimeOfDay(timestamp)
+  const timeOfDay = getTimeOfDayOverride() ?? getTimeOfDay(timestamp)
 
   return (
     <svg
@@ -73,7 +60,13 @@ function TimeOfDayIcon({ timestamp, color }: { timestamp: number; color: string 
       style={{ color }}
       aria-hidden="true"
     >
-      {timeOfDay === 'evening' ? (
+      {timeOfDay === 'morning' ? (
+        <>
+          <path d="M7 21h18" />
+          <path d="M10 21a6 6 0 0 1 12 0" />
+          <path d="M16 7v3M9.6 10.6l2.1 2.1M22.4 10.6l-2.1 2.1M6 16h3M23 16h3" />
+        </>
+      ) : timeOfDay === 'evening' ? (
         <path d="M24.5 20.5a10 10 0 0 1-13-13 10 10 0 1 0 13 13Z" />
       ) : (
         <>

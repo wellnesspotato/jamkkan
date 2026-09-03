@@ -10,7 +10,10 @@ type HourglassProps = {
 }
 
 function Hourglass({ progress, color }: HourglassProps) {
-  const clipPathId = useId().replaceAll(':', '')
+  const idPrefix = useId().replaceAll(':', '')
+  const clipPathId = `${idPrefix}-glass-clip`
+  const frameGradientId = `${idPrefix}-frame-gradient`
+  const glassGradientId = `${idPrefix}-glass-gradient`
   const normalizedProgress = Math.min(Math.max(progress, 0), 1)
   const sandHeight = 52
   const upperSandBottomY = 80
@@ -51,23 +54,37 @@ function Hourglass({ progress, color }: HourglassProps) {
       focusable="false"
     >
       <defs>
+        <linearGradient id={frameGradientId} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="var(--hourglass-frame-highlight)" />
+          <stop offset="0.48" stopColor="var(--hourglass-frame-base)" />
+          <stop offset="1" stopColor="var(--hourglass-frame-shadow)" />
+        </linearGradient>
+        <linearGradient id={glassGradientId} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.14" />
+          <stop offset="0.48" stopColor="#FFFFFF" stopOpacity="0.04" />
+          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0.08" />
+        </linearGradient>
         <clipPath id={clipPathId}>
           <path d={glassPath} />
         </clipPath>
       </defs>
 
-      <path className="hourglass-glass" d={glassPath} />
+      <g className="hourglass-glass">
+        <path
+          className="hourglass-glass-body"
+          d={glassPath}
+          fill={`url(#${glassGradientId})`}
+        />
+      </g>
 
-      <g clipPath={`url(#${clipPathId})`} fill={color}>
+      <g className="hourglass-sand" clipPath={`url(#${clipPathId})`} fill={color}>
         {upperSandHeight > 0 && (
           <path
-            className="hourglass-sand"
             d={`M24 ${upperSandY} Q60 ${upperSandCurveY} 96 ${upperSandY} V${upperSandBottomY} H24 Z`}
           />
         )}
         {lowerSandHeight > 0 && (
           <path
-            className="hourglass-sand"
             d={`M24 138 H96 V${lowerSandY + lowerMoundHeight} Q60 ${lowerSandSurfaceY} 24 ${lowerSandY + lowerMoundHeight} Z`}
           />
         )}
@@ -85,9 +102,16 @@ function Hourglass({ progress, color }: HourglassProps) {
         />
       )}
 
+      <g className="hourglass-glass-highlights" clipPath={`url(#${clipPathId})`}>
+        <path d="M38 34C39 47 44 59 52 68" />
+        <path d="M52 92C44 102 39 115 38 126" />
+      </g>
+
       <g className="hourglass-frame">
-        <path d="M18 20h84M18 140h84" />
-        <path d="M24 24v112M96 24v112" />
+        <rect x="17" y="17" width="86" height="8" rx="3" fill={`url(#${frameGradientId})`} />
+        <rect x="17" y="135" width="86" height="8" rx="3" fill={`url(#${frameGradientId})`} />
+        <rect x="21" y="23" width="7" height="114" rx="2.5" fill={`url(#${frameGradientId})`} />
+        <rect x="92" y="23" width="7" height="114" rx="2.5" fill={`url(#${frameGradientId})`} />
       </g>
     </svg>
   )
