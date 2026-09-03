@@ -144,7 +144,7 @@ const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
           {session.durationMs !== null && (
             <p className="record-duration">
               <span className="duration-value">{formatDuration(session.durationMs)}</span>{' '}
-              <span className="duration-label">머물렀어요</span>
+              <span className="duration-label"> 동안 머물렀어요</span>
             </p>
           )}
         </div>
