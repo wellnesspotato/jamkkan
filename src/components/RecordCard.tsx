@@ -156,7 +156,15 @@ const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
 
       {(session.note !== '' || session.place !== '') && (
         <div className="record-details">
-          {session.note !== '' && <p className="record-note">{session.note}</p>}
+          {session.note !== '' && (
+            <div className="record-note">
+              {session.note.split(/\r?\n(?:[ \t]*\r?\n)+/).map((paragraph, index) => (
+                <p className="record-note-paragraph" key={`${index}-${paragraph}`}>
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          )}
           {session.place !== '' && (
             <p className="record-place">
               <svg

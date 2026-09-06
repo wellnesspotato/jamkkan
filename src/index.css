@@ -37,7 +37,7 @@
   --radius-24: 24px;
   --radius-full: 9999px;
   --radius-postit: 4px;
-  --result-card-max-width: 420px;
+  --result-card-max-width: 348px;
   --share-capture-padding: 24px;
   --share-capture-gutter: 48px;
   --pause-top-breathing: 28px;
@@ -117,6 +117,12 @@ main {
   );
 }
 
+.result-screen {
+  padding-top: calc(
+    max(var(--space-5), env(safe-area-inset-top)) + var(--space-1)
+  );
+}
+
 .reflection-screen .screen-content,
 .result-screen .screen-content {
   margin-inline: auto;
@@ -148,23 +154,6 @@ main {
   text-align: center;
 }
 
-.result-preparation-spinner {
-  display: block;
-  width: 24px;
-  height: 24px;
-  margin: 0 auto var(--space-4);
-  border: 1.5px solid var(--color-divider);
-  border-top-color: var(--color-text-secondary);
-  border-radius: var(--radius-full);
-  -webkit-transform-origin: center;
-  transform-origin: center;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  will-change: transform;
-  -webkit-animation: result-preparation-spin 0.9s linear infinite;
-  animation: result-preparation-spin 0.9s linear infinite;
-}
-
 .result-preparation-title {
   color: var(--color-text-primary);
   font-size: var(--font-size-title);
@@ -178,26 +167,6 @@ main {
   font-size: var(--font-size-supporting);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-supporting);
-}
-
-@-webkit-keyframes result-preparation-spin {
-  to {
-    -webkit-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes result-preparation-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .result-preparation-spinner {
-    -webkit-animation: none;
-    animation: none;
-  }
 }
 
 h1,
@@ -771,6 +740,33 @@ textarea::placeholder {
   margin: 0;
 }
 
+.result-edit-action {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 var(--space-1);
+  padding: 0;
+  border: 0;
+  color: var(--color-text-secondary);
+  background: transparent;
+  font-size: var(--font-size-supporting);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-supporting);
+  text-align: left;
+  cursor: pointer;
+}
+
+.result-edit-action__icon {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+}
+
+.result-edit-action:active {
+  opacity: 0.78;
+}
+
 .share-capture-host {
   position: fixed;
   top: 0;
@@ -915,6 +911,14 @@ textarea::placeholder {
   overflow-wrap: anywhere;
   white-space: pre-wrap;
   line-height: 1.7;
+}
+
+.record-note-paragraph {
+  margin: 0;
+}
+
+.record-note-paragraph + .record-note-paragraph {
+  margin-top: 10px;
 }
 
 .record-place {

@@ -40,6 +40,7 @@ function App() {
   const [preparedShareFile, setPreparedShareFile] = useState<File | null>(null)
   const [isPreparingResult, setIsPreparingResult] = useState(false)
   const [resultPreparationError, setResultPreparationError] = useState('')
+  const [isEditingRecord, setIsEditingRecord] = useState(false)
   const [currentTheme, setCurrentTheme] = useState(() => getRandomTheme())
   const [minimumDurationMinutes] = useState(() =>
     getMinimumDurationMinutes(window.location.search),
@@ -57,6 +58,7 @@ function App() {
     setPreparedShareFile(null)
     setIsPreparingResult(false)
     setResultPreparationError('')
+    setIsEditingRecord(false)
     setSession({
       startedAt,
       endedAt: null,
@@ -103,8 +105,17 @@ function App() {
     setPreparedShareFile(null)
     setIsPreparingResult(false)
     setResultPreparationError('')
+    setIsEditingRecord(false)
     setCurrentTheme((theme) => getRandomTheme(theme.id))
     setPhase('landing')
+  }
+
+  const handleEditRecord = () => {
+    setPreparedShareFile(null)
+    setIsPreparingResult(false)
+    setResultPreparationError('')
+    setIsEditingRecord(true)
+    setPhase('reflection')
   }
 
   const handleReflectionComplete = (
@@ -145,6 +156,7 @@ function App() {
   const handleResultPrepared = (file: File) => {
     setPreparedShareFile(file)
     setIsPreparingResult(false)
+    setIsEditingRecord(false)
     setPhase('result')
   }
 
@@ -182,6 +194,7 @@ function App() {
           postitColor={theme.postit}
           isPreparingResult={isPreparingResult}
           preparationError={resultPreparationError}
+          isEditingRecord={isEditingRecord}
           onComplete={handleReflectionComplete}
           onKeywordFontChange={(keywordFont) => {
             setSession((currentSession) => ({
@@ -206,6 +219,7 @@ function App() {
       <ResultScreen
         session={session}
         preparedShareFile={preparedShareFile}
+        onEdit={handleEditRecord}
         onRestart={handleRestart}
       />
     )

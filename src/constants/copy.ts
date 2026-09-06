@@ -29,6 +29,7 @@ export const COPY = {
     validationKeyword: '키워드 하나만 남겨주세요',
     fontCycleAria: '글씨체 바꾸기',
     submit: '기록 남기기',
+    editSubmit: '수정 완료',
   },
   preparingResult: {
     title: '기록을 정리하고 있어요.',
@@ -50,6 +51,7 @@ export const COPY = {
     privacy: '이 기록은 화면을 나가면 사라져요',
     saveHint: '',
     downloadHint: '',
+    edit: '수정하기',
     restart: '처음으로',
   },
   time: {

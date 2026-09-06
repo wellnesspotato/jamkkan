@@ -17,6 +17,7 @@ type ReflectionScreenProps = {
   postitColor: string
   isPreparingResult: boolean
   preparationError: string
+  isEditingRecord: boolean
   onComplete: (
     keyword: string,
     note: string,
@@ -34,6 +35,7 @@ function ReflectionScreen({
   postitColor,
   isPreparingResult,
   preparationError,
+  isEditingRecord,
   onComplete,
   onKeywordFontChange,
 }: ReflectionScreenProps) {
@@ -168,7 +170,9 @@ function ReflectionScreen({
         </div>
 
         <button className="reflection-submit" type="submit">
-          {COPY.reflection.submit}
+          {isEditingRecord
+            ? COPY.reflection.editSubmit
+            : COPY.reflection.submit}
         </button>
         {validationMessage !== '' && (
           <p className="validation-message" aria-live="polite">
@@ -189,7 +193,6 @@ function ReflectionScreen({
             role="status"
             aria-live="polite"
           >
-            <span className="result-preparation-spinner" aria-hidden="true" />
             <p className="result-preparation-title">
               {COPY.preparingResult.title}
             </p>

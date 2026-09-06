@@ -11,6 +11,7 @@ import {
 type ResultScreenProps = {
   session: PauseSession
   preparedShareFile: File
+  onEdit: () => void
   onRestart: () => void
 }
 
@@ -37,6 +38,7 @@ function canSharePreparedFile(file: File) {
 function ResultScreen({
   session,
   preparedShareFile,
+  onEdit,
   onRestart,
 }: ResultScreenProps) {
   useLayoutEffect(() => {
@@ -177,6 +179,26 @@ function ResultScreen({
   return (
     <main className="screen result-screen">
       <div className="screen-content result-content">
+        <button
+          className="result-edit-action"
+          type="button"
+          aria-label="기록 수정하기"
+          onClick={onEdit}
+        >
+          <svg
+            className="result-edit-action__icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          <span>{COPY.result.edit}</span>
+        </button>
         <div className="result-card-display">
           <RecordCard session={session} showInstagramHandle />
         </div>
