@@ -208,6 +208,11 @@ button:focus-visible {
     max(var(--space-5), env(safe-area-inset-left));
 }
 
+.landing-screen {
+  height: 100vh;
+  height: 100svh;
+}
+
 .pause-layout {
   display: flex;
   flex: 0 0 auto;
