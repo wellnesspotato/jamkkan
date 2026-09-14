@@ -43,6 +43,8 @@ export const COPY = {
     place: (place: string) => `${place}에서`,
     share: '공유하기',
     download: '이미지로 저장하기',
+    imagePreviewLoading: '이미지를 준비하고 있어요.',
+    imagePreviewInstruction: '이미지를 길게 눌러 저장해주세요.',
     preparingShare: '공유 준비 중...',
     preparingImage: '이미지 만드는 중...',
     shareUnavailable: '이미지로 저장해 직접 공유할 수 있어요.',

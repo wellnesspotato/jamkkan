@@ -772,6 +772,49 @@ textarea::placeholder {
   opacity: 0.78;
 }
 
+.result-image-preview {
+  width: 100%;
+}
+
+.image-preview {
+  display: block;
+  width: 100%;
+  max-height: calc(100svh - 200px);
+  margin-inline: auto;
+  object-fit: contain;
+}
+
+.image-preview-instruction {
+  margin-top: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-supporting);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-supporting);
+}
+
+.image-preview-loading {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-supporting);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-supporting);
+  text-align: center;
+}
+
+.image-preview-instruction,
+.image-preview-loading {
+  min-height: 52px;
+}
+
+.image-preview-loading {
+  display: grid;
+  place-items: center;
+}
+
+.image-preview-instruction {
+  display: grid;
+  place-items: start center;
+}
+
 .share-capture-host {
   position: fixed;
   top: 0;

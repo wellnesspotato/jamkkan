@@ -1,5 +1,4 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import RecordCard from '../components/RecordCard'
 import { COPY } from '../constants/copy'
 import type { PauseSession } from '../types/pause'
 import {
@@ -7,6 +6,7 @@ import {
   isAbortError,
   logShareDebug,
 } from '../utils/shareDebug'
+import { isAndroidKakaoTalkInAppBrowser } from '../utils/browser'
 
 type ResultScreenProps = {
   session: PauseSession
@@ -62,10 +62,13 @@ function ResultScreen({
 
   const hasLoggedResultPhaseRef = useRef(false)
   const [isSharing, setIsSharing] = useState(false)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
   const [actionError, setActionError] = useState('')
   const [canUseWebShare, setCanUseWebShare] = useState(
     () => canSharePreparedFile(preparedShareFile),
   )
+  const isAndroidKakaoTalk = isAndroidKakaoTalkInAppBrowser()
+  const canUseFileShare = canUseWebShare && !isAndroidKakaoTalk
 
   useEffect(() => {
     if (hasLoggedResultPhaseRef.current) {
@@ -79,30 +82,29 @@ function ResultScreen({
     })
   }, [preparedShareFile])
 
-  const handleSaveImage = () => {
-    if (isSharing) {
-      return
-    }
-
-    setActionError('')
+  useEffect(() => {
+    let imageUrl: string | null = null
 
     try {
-      const imageUrl = URL.createObjectURL(preparedShareFile)
-      const downloadLink = document.createElement('a')
-
-      downloadLink.href = imageUrl
-      downloadLink.download = preparedShareFile.name
-      document.body.appendChild(downloadLink)
-      downloadLink.click()
-      downloadLink.remove()
-      window.setTimeout(() => URL.revokeObjectURL(imageUrl), 1_000)
+      imageUrl = URL.createObjectURL(preparedShareFile)
+      setImagePreviewUrl(imageUrl)
+      logShareDebug('image-preview-ready', {
+        environment: isAndroidKakaoTalk ? 'android-kakaotalk' : 'result-image',
+        fileSize: preparedShareFile.size,
+      })
     } catch {
       setActionError(COPY.result.imageError)
     }
-  }
+
+    return () => {
+      if (imageUrl !== null) {
+        URL.revokeObjectURL(imageUrl)
+      }
+    }
+  }, [isAndroidKakaoTalk, preparedShareFile])
 
   const handleShare = async () => {
-    if (!canUseWebShare || isSharing) {
+    if (!canUseFileShare || isSharing) {
       return
     }
 
@@ -199,12 +201,29 @@ function ResultScreen({
           </svg>
           <span>{COPY.result.edit}</span>
         </button>
-        <div className="result-card-display">
-          <RecordCard session={session} showInstagramHandle />
+        <div className="result-image-preview">
+          {imagePreviewUrl === null ? (
+            <p className="image-preview-loading">
+              {COPY.result.imagePreviewLoading}
+            </p>
+          ) : (
+            <>
+              <img
+                className="image-preview"
+                src={imagePreviewUrl}
+                alt="잠깐명상 기록 이미지"
+              />
+              {!canUseFileShare && (
+                <p className="image-preview-instruction">
+                  {COPY.result.imagePreviewInstruction}
+                </p>
+              )}
+            </>
+          )}
         </div>
 
         <div className="result-controls">
-          {canUseWebShare ? (
+          {canUseFileShare && (
             <button
               className="share-button"
               type="button"
@@ -213,28 +232,15 @@ function ResultScreen({
             >
               {COPY.result.share}
             </button>
-          ) : (
-            <button
-              className="save-image-button"
-              type="button"
-              disabled={isSharing}
-              onClick={handleSaveImage}
-            >
-              {COPY.result.download}
-            </button>
           )}
           {actionError !== '' && (
             <p className="image-error" aria-live="polite">
               {actionError}
             </p>
           )}
-          <p className="result-guidance">
-            {COPY.result.privacy}
-            <br />
-            {canUseWebShare
-              ? COPY.result.saveHint
-              : COPY.result.downloadHint}
-          </p>
+          {canUseFileShare && (
+            <p className="result-guidance">{COPY.result.privacy}</p>
+          )}
           <button className="restart-button" type="button" onClick={onRestart}>
             {COPY.result.restart}
           </button>
