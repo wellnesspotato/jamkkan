@@ -779,7 +779,6 @@ textarea::placeholder {
 .image-preview {
   display: block;
   width: 100%;
-  max-height: calc(100svh - 200px);
   margin-inline: auto;
   object-fit: contain;
 }
