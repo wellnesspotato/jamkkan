@@ -169,7 +169,9 @@ function ResultScreen({
         </div>
         {!canUseFileShare && (
           <p className="image-preview-instruction">
-            {COPY.result.imagePreviewInstruction}
+            {COPY.result.captureInstructionLines[0]}
+            <br />
+            {COPY.result.captureInstructionLines[1]}
           </p>
         )}
 

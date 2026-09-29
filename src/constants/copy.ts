@@ -46,6 +46,10 @@ export const COPY = {
     imagePreviewLoading: '이미지를 준비하고 있어요.',
     // imagePreviewInstruction: '이미지를 길게 눌러 저장해주세요.',
     imagePreviewInstruction: '이 기록은 화면을 나가면 사라져요',
+    captureInstructionLines: [
+      '이 기록은 화면을 나가면 사라져요',
+      '필요하다면 화면을 캡쳐해 저장해보세요.',
+    ],
     preparingShare: '공유 준비 중...',
     preparingImage: '이미지 만드는 중...',
     shareUnavailable: '이미지로 저장해 직접 공유할 수 있어요.',

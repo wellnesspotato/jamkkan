@@ -19,7 +19,7 @@ function CheckinResultPreparation({
   onPrepared,
   onError,
 }: CheckinResultPreparationProps) {
-  const captureRef = useRef<HTMLElement>(null)
+  const captureRef = useRef<HTMLDivElement>(null)
   const preparationPromiseRef = useRef<Promise<File> | null>(null)
 
   useLayoutEffect(() => {
@@ -103,9 +103,8 @@ function CheckinResultPreparation({
 
   return (
     <div className="share-capture-host" aria-hidden="true">
-      <div className="checkin-share-capture-wrapper">
+      <div ref={captureRef} className="checkin-share-capture-wrapper">
         <CheckinResultCard
-          ref={captureRef}
           checkin={checkin}
           formattedDateTime={formattedDateTime}
         />

@@ -1294,6 +1294,9 @@ textarea::placeholder {
 
 .checkin-share-capture-wrapper {
   width: min(400px, calc(100vw - 32px));
+  box-sizing: content-box;
+  padding: 12px;
+  background: var(--color-background);
 }
 
 .share-capture-wrapper {
@@ -1301,6 +1304,9 @@ textarea::placeholder {
     360px,
     calc(100vw - var(--space-5) - var(--space-5))
   );
+  box-sizing: content-box;
+  padding: 12px;
+  background: var(--color-background);
 }
 
 .record-card--share {

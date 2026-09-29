@@ -17,7 +17,7 @@ function ResultPreparation({
   onPrepared,
   onError,
 }: ResultPreparationProps) {
-  const captureRef = useRef<HTMLElement>(null)
+  const captureRef = useRef<HTMLDivElement>(null)
   const preparationPromiseRef = useRef<Promise<File> | null>(null)
   const hasLoggedPreparationRef = useRef(false)
 
