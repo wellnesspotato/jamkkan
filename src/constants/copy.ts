@@ -48,7 +48,7 @@ export const COPY = {
     imagePreviewInstruction: '이 기록은 화면을 나가면 사라져요',
     captureInstructionLines: [
       '이 기록은 화면을 나가면 사라져요',
-      '필요하다면 화면을 캡쳐해 저장해보세요.',
+      '화면을 캡처해 남겨보세요.',
     ],
     preparingShare: '공유 준비 중...',
     preparingImage: '이미지 만드는 중...',
