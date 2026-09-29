@@ -15,7 +15,7 @@ function createCheckinImageFileName(startedAt: number) {
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
 
-  return `gamja-room-checkin-${year}-${month}-${day}-${hours}${minutes}.png`
+  return `-checkin-${year}-${month}-${day}-${hours}${minutes}.png`
 }
 
 function waitForPaintFrames() {

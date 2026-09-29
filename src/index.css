@@ -223,11 +223,21 @@ button:focus-visible {
 }
 
 .checkin-intro__title-group {
-  margin-top: var(--space-8);
+  margin-top: var(--space-6);
+}
+
+.checkin-intro__symbol {
+  display: block;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto var(--space-3);
+  object-fit: contain;
 }
 
 .checkin-room-name {
   color: var(--color-text-secondary);
+  font-family: "Noto Serif KR", serif;
+  font-weight: var(--font-weight-medium);
   font-size: var(--font-size-supporting);
   line-height: var(--line-height-supporting);
 }
@@ -435,32 +445,118 @@ button:focus-visible {
   line-height: var(--line-height-caption);
 }
 
+.checkin-result-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: var(--space-4);
+}
+
+.checkin-result-card__header-copy {
+  min-width: 0;
+}
+
+.checkin-result-card__symbol {
+  display: block;
+  flex: 0 0 36px;
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+  opacity: 0.9;
+  pointer-events: none;
+  margin-right: -4px
+}
+
 .checkin-result-card__header p {
   color: var(--color-text-secondary);
+  font-family: "Noto Serif KR", serif;
+  font-weight: var(--font-weight-medium);
   font-size: var(--font-size-supporting);
   line-height: var(--line-height-supporting);
 }
 
-.checkin-result-card__header p:first-of-type {
-  margin-top: var(--space-7);
+.checkin-result-card__header-copy p:first-of-type {
+  margin-top: var(--space-1);
 }
 
-.checkin-result-card h1 {
-  margin-top: var(--space-5);
-  font-size: 30px;
+.checkin-result-card__direction {
+  margin-top: var(--space-7);
+  padding-bottom: var(--space-7);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.checkin-result-card__intention {
+  margin: 0;
+}
+
+.checkin-result-card__intention h1,
+.checkin-result-card__status > h1 {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-supporting);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-supporting);
+}
+
+.checkin-result-card__intention p {
+  margin-top: var(--space-3);
+  overflow-wrap: anywhere;
+  color: var(--color-text-primary);
+  font-size: 24px;
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-title);
 }
 
+.checkin-result-card__tips {
+  margin-top: var(--space-6);
+}
+
+.checkin-result-card__tips h2 {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-supporting);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-supporting);
+}
+
+.checkin-result-card__tips ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding-left: 20px;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-supporting);
+  line-height: var(--line-height-supporting);
+}
+
+.checkin-result-card__tips li {
+  padding-left: var(--space-1);
+  overflow-wrap: anywhere;
+}
+
+.checkin-result-card__status {
+  margin-top: var(--space-5);
+}
+
 .checkin-result-card__sections {
   display: grid;
-  gap: var(--space-5);
-  margin-top: var(--space-8);
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  /* margin-bottom: var(--space-4); */
 }
 
 .checkin-result-card__section {
   border-top: 1px solid var(--color-divider);
   padding-top: var(--space-3);
+}
+
+.checkin-result-card__section--compact {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  border-top: 0;
+  padding-top: 0;
 }
 
 .checkin-result-card__section h2 {
@@ -476,6 +572,49 @@ button:focus-visible {
   overflow-wrap: anywhere;
   font-size: var(--font-size-body);
   line-height: var(--line-height-body);
+}
+
+.checkin-result-card__category-pill {
+  flex: 0 0 auto;
+  border-radius: var(--radius-8);
+  padding: 4px 8px;
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, #C89B71 30%, var(--color-surface));
+  font-size: var(--font-size-caption) !important;
+  font-weight: var(--font-weight-medium) !important;
+  line-height: var(--line-height-caption) !important;
+}
+
+.checkin-result-card__pills {
+  display: flex;
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: var(--space-2);
+}
+
+.checkin-result-card__pill {
+  max-width: 100%;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-8);
+  padding: 5px 9px;
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-caption);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.checkin-result-card__signature {
+  margin-top: var(--space-5);
+  color: var(--color-text-tertiary);
+  font-family: "Noto Sans KR", sans-serif;
+  font-size: 12px;
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-caption);
+  letter-spacing: 0.01em;
 }
 
 .checkin-result-completion {

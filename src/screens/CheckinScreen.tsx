@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import gamjaRoomSymbol from '../assets/brand/gamja-room-gamja-transparent.svg'
 import CheckinMultiSelect from '../components/CheckinMultiSelect'
 import CheckinResultPreparation from '../components/CheckinResultPreparation'
 import ResultPreparationOverlay from '../components/ResultPreparationOverlay'
@@ -91,6 +92,12 @@ function CheckinScreen() {
         <section className="checkin-content checkin-intro" aria-labelledby="checkin-title">
           <p className="checkin-datetime">{introDateTime}</p>
           <div className="checkin-intro__title-group">
+            <img
+              className="checkin-intro__symbol"
+              src={gamjaRoomSymbol}
+              alt=""
+              aria-hidden="true"
+            />
             <p className="checkin-room-name">{CHECKIN_COPY.roomName}</p>
             <h1 id="checkin-title">{CHECKIN_COPY.title}</h1>
           </div>

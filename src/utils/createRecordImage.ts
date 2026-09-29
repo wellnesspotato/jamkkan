@@ -226,7 +226,8 @@ function hasAllFontCharacters(availableText: string, requestedText: string) {
 function createCheckinGoogleFontCssUrl(text: string) {
   const url = new URL('https://fonts.googleapis.com/css2')
 
-  url.searchParams.set('family', 'Noto Sans KR:wght@400;500;600')
+  url.searchParams.append('family', 'Noto Sans KR:wght@400;500;600')
+  url.searchParams.append('family', 'Noto Serif KR:wght@500')
   url.searchParams.set('text', text)
   url.searchParams.set('display', 'swap')
 
