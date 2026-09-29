@@ -109,7 +109,10 @@ const RecordCard = forwardRef<HTMLElement, RecordCardProps>(function RecordCard(
   const startedAtDateTime =
     session.startedAt === null ? undefined : new Date(session.startedAt).toISOString()
   return (
-    <article ref={ref} className="record-card">
+    <article
+      ref={ref}
+      className={`record-card${showInstagramHandle ? ' record-card--share' : ''}`}
+    >
       <header
         className={`record-card-header${showInstagramHandle ? ' record-card-header--share' : ''}`}
       >

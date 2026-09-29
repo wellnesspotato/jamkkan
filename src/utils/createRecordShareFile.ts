@@ -194,9 +194,7 @@ async function generateRecordShareFile(
 
   const layoutStartedAt = performance.now()
   const captureRect = captureElement.getBoundingClientRect()
-  const shareCardRect = captureElement
-    .querySelector<HTMLElement>('.record-card')
-    ?.getBoundingClientRect()
+  const shareCardRect = captureElement.getBoundingClientRect()
   const layoutElapsedMs = performance.now() - layoutStartedAt
   const outputWidth = Math.round(captureRect.width * pixelRatio)
   const outputHeight = Math.round(captureRect.height * pixelRatio)

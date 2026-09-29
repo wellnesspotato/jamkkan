@@ -8,6 +8,7 @@ import {
 } from '../utils/shareDebug'
 import { isAndroidKakaoTalkInAppBrowser } from '../utils/browser'
 import { canShareFile } from '../utils/fileShare'
+import RecordCard from '../components/RecordCard'
 
 type ResultScreenProps = {
   session: PauseSession
@@ -46,7 +47,6 @@ function ResultScreen({
 
   const hasLoggedResultPhaseRef = useRef(false)
   const [isSharing, setIsSharing] = useState(false)
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
   const [actionError, setActionError] = useState('')
   const [canUseWebShare, setCanUseWebShare] = useState(
     () => canShareFile(preparedShareFile),
@@ -65,27 +65,6 @@ function ResultScreen({
       fileSize: preparedShareFile.size,
     })
   }, [preparedShareFile])
-
-  useEffect(() => {
-    let imageUrl: string | null = null
-
-    try {
-      imageUrl = URL.createObjectURL(preparedShareFile)
-      setImagePreviewUrl(imageUrl)
-      logShareDebug('image-preview-ready', {
-        environment: isAndroidKakaoTalk ? 'android-kakaotalk' : 'result-image',
-        fileSize: preparedShareFile.size,
-      })
-    } catch {
-      setActionError(COPY.result.imageError)
-    }
-
-    return () => {
-      if (imageUrl !== null) {
-        URL.revokeObjectURL(imageUrl)
-      }
-    }
-  }, [isAndroidKakaoTalk, preparedShareFile])
 
   const handleShare = async () => {
     if (!canUseFileShare || isSharing) {
@@ -185,26 +164,14 @@ function ResultScreen({
           </svg>
           <span>{COPY.result.edit}</span>
         </button>
-        <div className="result-image-preview">
-          {imagePreviewUrl === null ? (
-            <p className="image-preview-loading">
-              {COPY.result.imagePreviewLoading}
-            </p>
-          ) : (
-            <>
-              <img
-                className="image-preview"
-                src={imagePreviewUrl}
-                alt="잠깐명상 기록 이미지"
-              />
-              {!canUseFileShare && (
-                <p className="image-preview-instruction">
-                  {COPY.result.imagePreviewInstruction}
-                </p>
-              )}
-            </>
-          )}
+        <div className="result-card-display">
+          <RecordCard session={session} showInstagramHandle />
         </div>
+        {!canUseFileShare && (
+          <p className="image-preview-instruction">
+            {COPY.result.imagePreviewInstruction}
+          </p>
+        )}
 
         <div className="result-controls">
           {canUseFileShare && (

@@ -6,11 +6,11 @@ type RecordShareCardProps = {
   session: PauseSession
 }
 
-const RecordShareCard = forwardRef<HTMLDivElement, RecordShareCardProps>(
+const RecordShareCard = forwardRef<HTMLElement, RecordShareCardProps>(
   function RecordShareCard({ session }, ref) {
     return (
-      <div ref={ref} className="share-capture-wrapper">
-        <RecordCard session={session} showInstagramHandle />
+      <div className="share-capture-wrapper">
+        <RecordCard ref={ref} session={session} showInstagramHandle />
       </div>
     )
   },

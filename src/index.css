@@ -37,9 +37,6 @@
   --radius-24: 24px;
   --radius-full: 9999px;
   --radius-postit: 4px;
-  --result-card-max-width: 348px;
-  --share-capture-padding: 24px;
-  --share-capture-gutter: 48px;
   --pause-top-breathing: 28px;
   --pause-hourglass-stage-offset: 32px;
   --pause-hourglass-stage-height: 280px;
@@ -1199,7 +1196,7 @@ textarea::placeholder {
 }
 
 .result-content {
-  width: min(100%, var(--result-card-max-width));
+  width: min(100%, 360px);
 }
 
 .record-card {
@@ -1215,7 +1212,8 @@ textarea::placeholder {
 }
 
 .result-card-display {
-  margin: 0;
+  width: 100%;
+  margin-inline: auto;
 }
 
 .result-edit-action {
@@ -1299,19 +1297,15 @@ textarea::placeholder {
 }
 
 .share-capture-wrapper {
-  width: calc(
-    min(
-        var(--result-card-max-width),
-        calc(100vw - var(--share-capture-gutter))
-      ) + var(--share-capture-gutter)
+  width: min(
+    360px,
+    calc(100vw - var(--space-5) - var(--space-5))
   );
-  height: auto;
-  padding: var(--share-capture-padding);
-  background: var(--color-background);
 }
 
-.share-capture-wrapper .record-card {
+.record-card--share {
   box-shadow: none;
+  overflow: hidden;
 }
 
 .record-card .brand-logo {
