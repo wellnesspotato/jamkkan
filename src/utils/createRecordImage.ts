@@ -509,10 +509,8 @@ export async function createRecordImage(
   const fontEmbedCSS =
     preparedFontEmbedCSS ??
     (await prepareRecordImageFonts(keywordFont)).fontEmbedCSS
-  const backgroundColor = window.getComputedStyle(element).backgroundColor
 
   const blob = await toBlob(element, {
-    backgroundColor,
     fontEmbedCSS,
     pixelRatio,
   })
