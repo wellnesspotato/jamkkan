@@ -136,6 +136,11 @@ function CheckinScreen() {
       ? CHECKIN_COPY.mindDescription
       : CHECKIN_COPY.intentionDescription
   const step = isBody ? 1 : isMind ? 2 : 3
+  const canProceed = isBody
+    ? checkin.body.length > 0
+    : isMind
+      ? checkin.mind.length > 0
+      : typeof checkin.intention === 'string' && checkin.intention.trim() !== ''
 
   return (
     <main className="checkin-screen">
@@ -207,7 +212,7 @@ function CheckinScreen() {
             className="checkin-primary-button"
             type="button"
             onClick={handleNext}
-            disabled={isPreparing}
+            disabled={isPreparing || !canProceed}
           >
             {CHECKIN_COPY.next}
           </button>
