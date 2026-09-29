@@ -9,7 +9,7 @@ import {
   prepareRecordImageFonts,
   RECORD_IMAGE_PIXEL_RATIO,
 } from './createRecordImage'
-import { isShareDebugEnabled, logShareDebug } from './shareDebug'
+import { isShareDebugEnabled, logExportTiming, logShareDebug } from './shareDebug'
 
 const RECORD_UI_FONT_LOAD_VALUES = [
   '400 16px "Noto Sans KR"',
@@ -141,10 +141,19 @@ async function generateRecordShareFile(
     keywordFont: session.keywordFont,
     generationCount,
   })
+  logExportTiming('pause', 'generation-start', {
+    generationCount,
+    pixelRatio,
+  })
 
   const visibleFontMetrics = await prepareVisibleRecordFonts(session)
 
   logShareDebug('font-ready', {
+    elapsedMs: visibleFontMetrics.visibleFontsReadyElapsedMs,
+    selectedFontElapsedMs: visibleFontMetrics.selectedFontReadyElapsedMs,
+    uiFontsElapsedMs: visibleFontMetrics.uiFontReadyElapsedMs,
+  })
+  logExportTiming('pause', 'visible-fonts-ready', {
     elapsedMs: visibleFontMetrics.visibleFontsReadyElapsedMs,
     selectedFontElapsedMs: visibleFontMetrics.selectedFontReadyElapsedMs,
     uiFontsElapsedMs: visibleFontMetrics.uiFontReadyElapsedMs,
@@ -168,10 +177,20 @@ async function generateRecordShareFile(
       KEYWORD_FONT_FAMILY[session.keywordFont],
     ),
   })
+  logExportTiming('pause', 'font-embed-ready', {
+    elapsedMs: fontEmbedElapsedMs,
+    cacheHit: fontEmbedCacheHit,
+    source: fontEmbedSource,
+    cssLength: fontEmbedCSS.length,
+  })
 
   const paintSyncStartedAt = performance.now()
   await waitForPaintFrames()
   const paintSyncElapsedMs = performance.now() - paintSyncStartedAt
+  logExportTiming('pause', 'paint-frames-ready', {
+    elapsedMs: paintSyncElapsedMs,
+    frameCount: 2,
+  })
 
   const layoutStartedAt = performance.now()
   const captureRect = captureElement.getBoundingClientRect()
@@ -227,6 +246,15 @@ async function generateRecordShareFile(
     outputPixelCount,
     pixelRatio,
   })
+  logExportTiming('pause', 'capture-layout-ready', {
+    elapsedMs: layoutElapsedMs,
+    captureCssWidth: captureRect.width,
+    captureCssHeight: captureRect.height,
+    outputWidth,
+    outputHeight,
+    outputPixelCount,
+    pixelRatio,
+  })
 
   const captureStartedAt = performance.now()
 
@@ -256,6 +284,11 @@ async function generateRecordShareFile(
     outputPixelCount,
     pixelRatio,
   })
+  logExportTiming('pause', 'dom-to-blob-complete', {
+    elapsedMs: captureElapsedMs,
+    blobSize: blob.size,
+    blobType: blob.type,
+  })
 
   const fileStartedAt = performance.now()
   const file = createRecordFile(blob, session.startedAt)
@@ -274,6 +307,11 @@ async function generateRecordShareFile(
     fileName: file.name,
     fileSize: file.size,
     fileType: file.type,
+  })
+  logExportTiming('pause', 'file-ready', {
+    elapsedMs: fileElapsedMs,
+    totalGenerationElapsedMs: performance.now() - generationStartedAt,
+    fileSize: file.size,
   })
 
   return file

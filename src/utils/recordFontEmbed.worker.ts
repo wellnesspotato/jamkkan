@@ -1,7 +1,7 @@
 type FontEmbedRequest = {
   googleCssUrl: string
-  daughterFontUrl: string
-  newlywedFontUrl: string
+  daughterFontUrl?: string
+  newlywedFontUrl?: string
 }
 
 type FontEmbedProgress = {
@@ -93,7 +93,10 @@ workerScope.onmessage = async (event: MessageEvent<FontEmbedRequest>) => {
     }
 
     const googleCss = await googleResponse.text()
-    const localCss = `
+    const localCss =
+      event.data.daughterFontUrl !== undefined &&
+      event.data.newlywedFontUrl !== undefined
+        ? `
       @font-face {
         font-family: "NanumURiDdarSonGeurSsi";
         src: url("${event.data.daughterFontUrl}") format("woff2");
@@ -107,6 +110,7 @@ workerScope.onmessage = async (event: MessageEvent<FontEmbedRequest>) => {
         font-weight: 400;
       }
     `
+        : ''
     const sourceCss = `${googleCss}\n${localCss}`
     const cssReadyMessage: FontEmbedProgress = {
       type: 'progress',

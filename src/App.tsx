@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import ResultPreparation from './components/ResultPreparation'
 import { COPY } from './constants/copy'
 import { getMinimumDurationMinutes } from './constants/pause'
@@ -7,12 +7,13 @@ import LandingScreen from './screens/LandingScreen'
 import PauseScreen from './screens/PauseScreen'
 import ReflectionScreen from './screens/ReflectionScreen'
 import ResultScreen from './screens/ResultScreen'
+import CheckinScreen from './screens/CheckinScreen'
 import type { KeywordFont, PausePhase, PauseSession } from './types/pause'
 import {
   getRecordImageFontEmbedStatus,
   prewarmRecordImageFonts,
 } from './utils/createRecordImage'
-import { logShareDebug } from './utils/shareDebug'
+import { logExportTiming, logShareDebug } from './utils/shareDebug'
 
 const initialSession: PauseSession = {
   startedAt: null,
@@ -35,11 +36,23 @@ function getRandomTheme(excludedThemeId?: string) {
 }
 
 function App() {
+  const checkinPath = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/checkin`
+
+  if (
+    window.location.pathname === '/checkin' ||
+    window.location.pathname === '/checkin/' ||
+    window.location.pathname === checkinPath ||
+    window.location.pathname === `${checkinPath}/`
+  ) {
+    return <CheckinScreen />
+  }
+
   const [phase, setPhase] = useState<PausePhase>('landing')
   const [session, setSession] = useState<PauseSession>(initialSession)
   const [preparedShareFile, setPreparedShareFile] = useState<File | null>(null)
   const [isPreparingResult, setIsPreparingResult] = useState(false)
   const [resultPreparationError, setResultPreparationError] = useState('')
+  const resultPreparationStartedAtRef = useRef<number | null>(null)
   const [isEditingRecord, setIsEditingRecord] = useState(false)
   const [currentTheme, setCurrentTheme] = useState(() => getRandomTheme())
   const [minimumDurationMinutes] = useState(() =>
@@ -124,6 +137,8 @@ function App() {
     place: string,
     keywordFont: KeywordFont,
   ) => {
+    resultPreparationStartedAtRef.current = performance.now()
+    logExportTiming('pause', 'transition-start')
     const fontEmbedStatus = getRecordImageFontEmbedStatus()
 
     logShareDebug('reflection-submit', {
@@ -154,6 +169,12 @@ function App() {
   }
 
   const handleResultPrepared = (file: File) => {
+    if (resultPreparationStartedAtRef.current !== null) {
+      logExportTiming('pause', 'result-screen-entering', {
+        elapsedMs: performance.now() - resultPreparationStartedAtRef.current,
+        fileSize: file.size,
+      })
+    }
     setPreparedShareFile(file)
     setIsPreparingResult(false)
     setIsEditingRecord(false)
@@ -206,6 +227,7 @@ function App() {
         {isPreparingResult && (
           <ResultPreparation
             session={session}
+            transitionStartedAt={resultPreparationStartedAtRef.current ?? performance.now()}
             onPrepared={handleResultPrepared}
             onError={handleResultPreparationError}
           />

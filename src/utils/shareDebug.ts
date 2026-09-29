@@ -1,5 +1,8 @@
 export function isShareDebugEnabled() {
-  return new URLSearchParams(window.location.search).get('shareDebug') === '1'
+  return (
+    import.meta.env.DEV &&
+    new URLSearchParams(window.location.search).get('shareDebug') === '1'
+  )
 }
 
 export function logShareDebug(
@@ -8,6 +11,16 @@ export function logShareDebug(
 ) {
   if (isShareDebugEnabled()) {
     console.info(`[jamkkan share] ${step}`, details)
+  }
+}
+
+export function logExportTiming(
+  flow: 'checkin' | 'pause',
+  step: string,
+  details: Record<string, unknown> = {},
+) {
+  if (isShareDebugEnabled()) {
+    console.info(`[${flow} export] ${step}`, details)
   }
 }
 

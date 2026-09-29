@@ -1,7 +1,7 @@
 import { getFontEmbedCSS, toBlob } from 'html-to-image'
 import { KEYWORD_FONT_FAMILY } from '../constants/keywordFonts'
 import type { KeywordFont } from '../types/pause'
-import { isShareDebugEnabled, logShareDebug } from './shareDebug'
+import { isShareDebugEnabled, logExportTiming, logShareDebug } from './shareDebug'
 
 export const RECORD_IMAGE_PIXEL_RATIO = 2
 
@@ -19,6 +19,26 @@ const fontEmbedVariantCache = new Map<KeywordFont, string>()
 
 const GOOGLE_FONT_CSS_URL =
   'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500&display=swap'
+
+type FontEmbedWorkerResult = {
+  css: string
+  resourceCount: number
+}
+
+type FontEmbedWorkerOptions = {
+  googleCssUrl: string
+  includeCustomFonts: boolean
+}
+
+type CheckinFontEmbedCache = FontEmbedWorkerResult & {
+  text: string
+  origin: 'prewarmed' | 'generated'
+}
+
+let checkinFontEmbedCache: CheckinFontEmbedCache | null = null
+let checkinFontEmbedPromise: Promise<CheckinFontEmbedCache> | null = null
+let checkinFontEmbedPromiseText = ''
+let checkinFontEmbedPromiseOrigin: 'prewarmed' | 'generated' | null = null
 
 function getFontEmbedCssForKeywordFont(
   allFontEmbedCSS: string,
@@ -72,8 +92,11 @@ function createFontEmbedProbe() {
   return probe
 }
 
-function generateFontEmbedCssInWorker() {
-  return new Promise<string>((resolve, reject) => {
+function runFontEmbedWorker({
+  googleCssUrl,
+  includeCustomFonts,
+}: FontEmbedWorkerOptions) {
+  return new Promise<FontEmbedWorkerResult>((resolve, reject) => {
     const worker = new Worker(
       new URL('./recordFontEmbed.worker.ts', import.meta.url),
       { type: 'module' },
@@ -108,7 +131,10 @@ function generateFontEmbedCssInWorker() {
           elapsedMs: event.data.elapsedMs,
           resourceCount: event.data.resourceCount,
         })
-        resolve(event.data.css)
+        resolve({
+          css: event.data.css,
+          resourceCount: event.data.resourceCount,
+        })
         return
       }
 
@@ -121,17 +147,28 @@ function generateFontEmbedCssInWorker() {
     }
 
     worker.postMessage({
-      googleCssUrl: GOOGLE_FONT_CSS_URL,
-      daughterFontUrl: new URL(
-        '../assets/NanumURiDdarSonGeurSsi.woff2',
-        import.meta.url,
-      ).href,
-      newlywedFontUrl: new URL(
-        '../assets/NanumSinHonBuBu.woff2',
-        import.meta.url,
-      ).href,
+      googleCssUrl,
+      ...(includeCustomFonts
+        ? {
+            daughterFontUrl: new URL(
+              '../assets/NanumURiDdarSonGeurSsi.woff2',
+              import.meta.url,
+            ).href,
+            newlywedFontUrl: new URL(
+              '../assets/NanumSinHonBuBu.woff2',
+              import.meta.url,
+            ).href,
+          }
+        : {}),
     })
   })
+}
+
+function generateFontEmbedCssInWorker() {
+  return runFontEmbedWorker({
+    googleCssUrl: GOOGLE_FONT_CSS_URL,
+    includeCustomFonts: true,
+  }).then(({ css }) => css)
 }
 
 function generateFontEmbedCssOnMainThread() {
@@ -172,6 +209,161 @@ function startFontEmbedCssGeneration(origin: 'prewarmed' | 'generated') {
 
   fontEmbedCssPromise = promise
   return promise
+}
+
+function normalizeFontText(text: string) {
+  return Array.from(new Set(text)).sort().join('')
+}
+
+function hasAllFontCharacters(availableText: string, requestedText: string) {
+  const availableCharacters = new Set(availableText)
+
+  return Array.from(requestedText).every((character) =>
+    availableCharacters.has(character),
+  )
+}
+
+function createCheckinGoogleFontCssUrl(text: string) {
+  const url = new URL('https://fonts.googleapis.com/css2')
+
+  url.searchParams.set('family', 'Noto Sans KR:wght@400;500;600')
+  url.searchParams.set('text', text)
+  url.searchParams.set('display', 'swap')
+
+  return url.href
+}
+
+function startCheckinFontEmbedGeneration(
+  requestedText: string,
+  origin: 'prewarmed' | 'generated',
+) {
+  const text = normalizeFontText(
+    `${checkinFontEmbedCache?.text ?? ''}${requestedText}`,
+  )
+
+  checkinFontEmbedPromiseText = text
+  checkinFontEmbedPromiseOrigin = origin
+
+  const promise = runFontEmbedWorker({
+    googleCssUrl: createCheckinGoogleFontCssUrl(text),
+    includeCustomFonts: false,
+  })
+    .then(({ css, resourceCount }) => {
+      const cache: CheckinFontEmbedCache = {
+        css,
+        resourceCount,
+        text,
+        origin,
+      }
+
+      checkinFontEmbedCache = cache
+      checkinFontEmbedPromise = null
+      checkinFontEmbedPromiseText = ''
+      checkinFontEmbedPromiseOrigin = null
+      return cache
+    })
+    .catch((error) => {
+      checkinFontEmbedPromise = null
+      checkinFontEmbedPromiseText = ''
+      checkinFontEmbedPromiseOrigin = null
+      throw error
+    })
+
+  checkinFontEmbedPromise = promise
+  return promise
+}
+
+export function prewarmCheckinImageFonts(text: string) {
+  const requestedText = normalizeFontText(text)
+
+  if (
+    checkinFontEmbedCache !== null &&
+    hasAllFontCharacters(checkinFontEmbedCache.text, requestedText)
+  ) {
+    logExportTiming('checkin', 'font-prewarm-cache-hit', {
+      cssLength: checkinFontEmbedCache.css.length,
+      resourceCount: checkinFontEmbedCache.resourceCount,
+    })
+    return Promise.resolve(checkinFontEmbedCache)
+  }
+
+  if (
+    checkinFontEmbedPromise !== null &&
+    hasAllFontCharacters(checkinFontEmbedPromiseText, requestedText)
+  ) {
+    logExportTiming('checkin', 'font-prewarm-promise-reused', {
+      origin: checkinFontEmbedPromiseOrigin,
+    })
+    return checkinFontEmbedPromise
+  }
+
+  const startedAt = performance.now()
+  logExportTiming('checkin', 'font-prewarm-start', {
+    characterCount: requestedText.length,
+  })
+  const promise = startCheckinFontEmbedGeneration(requestedText, 'prewarmed')
+
+  void promise.then(
+    (cache) => {
+      logExportTiming('checkin', 'font-prewarm-complete', {
+        elapsedMs: performance.now() - startedAt,
+        resourceCount: cache.resourceCount,
+        cssLength: cache.css.length,
+        characterCount: cache.text.length,
+      })
+    },
+    () => {
+      logExportTiming('checkin', 'font-prewarm-failed', {
+        elapsedMs: performance.now() - startedAt,
+      })
+    },
+  )
+
+  return promise
+}
+
+export async function prepareCheckinImageFonts(text: string) {
+  const requestedText = normalizeFontText(text)
+
+  if (
+    checkinFontEmbedCache !== null &&
+    hasAllFontCharacters(checkinFontEmbedCache.text, requestedText)
+  ) {
+    return {
+      fontEmbedCSS: checkinFontEmbedCache.css,
+      cacheHit: true,
+      source:
+        checkinFontEmbedCache.origin === 'prewarmed'
+          ? ('prewarmed' as const)
+          : ('cache' as const),
+      resourceCount: checkinFontEmbedCache.resourceCount,
+    }
+  }
+
+  if (checkinFontEmbedPromise !== null) {
+    const pendingCache = await checkinFontEmbedPromise
+
+    if (hasAllFontCharacters(pendingCache.text, requestedText)) {
+      return {
+        fontEmbedCSS: pendingCache.css,
+        cacheHit: false,
+        source: 'in-flight-promise' as const,
+        resourceCount: pendingCache.resourceCount,
+      }
+    }
+  }
+
+  const cache = await startCheckinFontEmbedGeneration(
+    requestedText,
+    'generated',
+  )
+
+  return {
+    fontEmbedCSS: cache.css,
+    cacheHit: false,
+    source: 'generated' as const,
+    resourceCount: cache.resourceCount,
+  }
 }
 
 function observePrewarmLongTasks() {

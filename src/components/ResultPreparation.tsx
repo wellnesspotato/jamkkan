@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useRef } from 'react'
 import type { PauseSession } from '../types/pause'
 import { createRecordShareFile } from '../utils/createRecordShareFile'
-import { getErrorDetails, logShareDebug } from '../utils/shareDebug'
+import { getErrorDetails, logExportTiming, logShareDebug } from '../utils/shareDebug'
 import RecordShareCard from './RecordShareCard'
 
 type ResultPreparationProps = {
   session: PauseSession
+  transitionStartedAt: number
   onPrepared: (file: File) => void
   onError: () => void
 }
 
 function ResultPreparation({
   session,
+  transitionStartedAt,
   onPrepared,
   onError,
 }: ResultPreparationProps) {
@@ -66,10 +68,21 @@ function ResultPreparation({
     if (!hasLoggedPreparationRef.current) {
       hasLoggedPreparationRef.current = true
       logShareDebug('preparing-overlay-entered')
+      logExportTiming('pause', 'loading-mounted')
+      logExportTiming('pause', 'export-dom-mounted', {
+        elapsedMs: performance.now() - transitionStartedAt,
+        hasCaptureElement: captureRef.current !== null,
+      })
     }
 
     animationFrameId = window.requestAnimationFrame(() => {
+      logExportTiming('pause', 'request-animation-frame', {
+        elapsedMs: performance.now() - preparationStartedAt,
+      })
       timeoutId = window.setTimeout(() => {
+        logExportTiming('pause', 'zero-timeout-fired', {
+          elapsedMs: performance.now() - preparationStartedAt,
+        })
         logShareDebug('capture-dom-ready', {
           elapsedMs: performance.now() - preparationStartedAt,
           hasCaptureElement: captureRef.current !== null,
@@ -85,6 +98,10 @@ function ResultPreparation({
               elapsedMs: performance.now() - preparationStartedAt,
               fileSize: file.size,
             })
+            logExportTiming('pause', 'preparation-complete', {
+              elapsedMs: performance.now() - transitionStartedAt,
+              fileSize: file.size,
+            })
             onPrepared(file)
           })
           .catch((error) => {
@@ -95,6 +112,9 @@ function ResultPreparation({
             logShareDebug('pre-generation-failed', {
               elapsedMs: performance.now() - preparationStartedAt,
               ...getErrorDetails(error),
+            })
+            logExportTiming('pause', 'preparation-failed', {
+              elapsedMs: performance.now() - preparationStartedAt,
             })
             onError()
           })

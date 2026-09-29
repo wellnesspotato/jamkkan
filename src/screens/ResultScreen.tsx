@@ -7,6 +7,7 @@ import {
   logShareDebug,
 } from '../utils/shareDebug'
 import { isAndroidKakaoTalkInAppBrowser } from '../utils/browser'
+import { canShareFile } from '../utils/fileShare'
 
 type ResultScreenProps = {
   session: PauseSession
@@ -16,24 +17,6 @@ type ResultScreenProps = {
 }
 
 let scrollResetSessionId: number | null = null
-
-function canSharePreparedFile(file: File) {
-  if (
-    typeof navigator === 'undefined' ||
-    typeof navigator.share !== 'function'
-  ) {
-    return false
-  }
-
-  try {
-    return (
-      typeof navigator.canShare !== 'function' ||
-      navigator.canShare({ files: [file] })
-    )
-  } catch {
-    return false
-  }
-}
 
 function ResultScreen({
   session,
@@ -58,6 +41,7 @@ function ResultScreen({
       scrollingElement.scrollTop = 0
       scrollingElement.scrollLeft = 0
     }
+
   }, [session.startedAt])
 
   const hasLoggedResultPhaseRef = useRef(false)
@@ -65,7 +49,7 @@ function ResultScreen({
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
   const [actionError, setActionError] = useState('')
   const [canUseWebShare, setCanUseWebShare] = useState(
-    () => canSharePreparedFile(preparedShareFile),
+    () => canShareFile(preparedShareFile),
   )
   const isAndroidKakaoTalk = isAndroidKakaoTalkInAppBrowser()
   const canUseFileShare = canUseWebShare && !isAndroidKakaoTalk

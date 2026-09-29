@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { COPY } from '../constants/copy'
+import ResultPreparationOverlay from '../components/ResultPreparationOverlay'
 import {
   getNextKeywordFont,
   getKeywordSizeClass,
@@ -187,20 +188,7 @@ function ReflectionScreen({
       </form>
 
       {isPreparingResult && (
-        <div className="result-preparation-overlay">
-          <div
-            className="result-preparation-status"
-            role="status"
-            aria-live="polite"
-          >
-            <p className="result-preparation-title">
-              {COPY.preparingResult.title}
-            </p>
-            <p className="result-preparation-description">
-              {COPY.preparingResult.description}
-            </p>
-          </div>
-        </div>
+        <ResultPreparationOverlay />
       )}
     </main>
   )
