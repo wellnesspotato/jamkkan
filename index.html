@@ -41,6 +41,27 @@
     />
   </head>
   <body>
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search)
+        var route = params.get('p')
+
+        if (!route) {
+          return
+        }
+
+        var repositoryRoot = '/jamkkan'
+        var normalizedRoute = route.charAt(0) === '/' ? route : '/' + route
+        var query = params.get('q')
+        var target = repositoryRoot + normalizedRoute
+
+        if (query) {
+          target += '?' + query
+        }
+
+        window.history.replaceState(null, '', target + window.location.hash)
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

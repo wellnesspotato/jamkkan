@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex" />
+    <title>잠깐명상</title>
+    <script>
+      (function () {
+        var repositoryRoot = '/jamkkan/'
+        var path = window.location.pathname
+        var route = path.indexOf(repositoryRoot) === 0
+          ? path.slice(repositoryRoot.length)
+          : ''
+        var query = window.location.search.slice(1)
+        var redirect = repositoryRoot + '?p=' + encodeURIComponent('/' + route)
+
+        if (query) {
+          redirect += '&q=' + encodeURIComponent(query)
+        }
+
+        window.location.replace(redirect + window.location.hash)
+      })()
+    </script>
+  </head>
+  <body></body>
+</html>
